@@ -1,0 +1,15 @@
+$--button-default-color: $--text-color;
+$--button-default-fill: unset;//rgba(0, 0, 0, .1);
+$--button-hover-fill: $--color-hover;
+@import "element-ui/packages/theme-chalk/src/button.scss";
+
+@include b(button)  {
+    border-radius: 4px;
+    transition: background-color 150ms linear, text-shadow 150ms linear, color 150ms linear;
+
+    &:hover, &:focus {
+        color: $--button-default-color;
+        background-color: $--button-hover-fill;
+        text-shadow: $--button-default-color 0 0 10px;
+    }
+}

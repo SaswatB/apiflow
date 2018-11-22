@@ -1,0 +1,30 @@
+$--input-fill: unset;
+$--input-color: $--text-color;
+// $--input-border: unset;
+$--background-color-base: unset;
+$--input-disabled-fill: unset;
+$--input-disabled-color: $--text-color;
+// $--border-base: unset;
+$--input-border-radius: unset;
+@import "element-ui/packages/theme-chalk/src/input.scss";
+
+@include b(input) {
+    @include e(inner) {
+        border-top: unset;
+        border-left: unset;
+        border-right: unset;
+    }
+}
+
+@include b(input-group) {
+    @include e((append, prepend)) {
+        border-top: unset;
+        border-left: unset;
+        border-right: unset;
+        button.el-button,
+        div.el-select .el-input__inner,
+        div.el-select:hover .el-input__inner {
+            color: $--input-color;
+        }
+    }
+}

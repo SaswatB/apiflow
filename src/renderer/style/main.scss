@@ -1,0 +1,42 @@
+@import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro');
+@import "./element-ui/index.scss";
+@import "./tooltip.scss";
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Source Sans Pro', sans-serif;
+    color: white;
+}
+
+.tree-title {
+    display: inline-flex;
+    width: 100%;
+
+    .spacer {
+        flex-grow: 1;
+    }
+}
+
+.muted {
+    color: rgb(160, 160, 160);
+}
+
+.el-select.none input {
+    font-style: italic;
+    color: rgb(160, 160, 160)
+}
+
+//TODO: properly style dialogs
+//custom style for dialog
+.el-dialog {
+
+    input,
+    button {
+        color: black;
+    }
+}

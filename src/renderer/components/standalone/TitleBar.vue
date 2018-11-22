@@ -1,0 +1,91 @@
+<template>
+  <div class="titlebar">
+    <p class="title">
+      {{ title }}
+    </p>
+    <div class="title-bar-btns">
+      <button id="min-btn" @click="minimize()"><i class="mdi mdi-window-minimize" /></button>
+      <button id="max-btn" @click="maximize()"><i class="mdi mdi-window-maximize"/></button>
+      <button id="close-btn" @click="appClose()"><i class="mdi mdi-window-close"/></button>
+    </div>
+  </div>
+</template>
+
+<script>
+  const BrowserWindow = require('electron').remote.getCurrentWindow();
+
+  export default {
+    name: 'TitleBar',
+    props: {
+      title: {
+        type: String,
+        required: true
+      }
+    },
+    methods: {
+      minimize() {
+        BrowserWindow.minimize();
+      },
+      maximize() {
+        if (!BrowserWindow.isMaximized()) {
+          BrowserWindow.maximize();
+        } else {
+          BrowserWindow.unmaximize();
+        }
+      },
+      appClose() {
+        BrowserWindow.close();
+      }
+    }
+  }
+</script>
+
+<style lang="scss">
+  @import '~@mdi/font/css/materialdesignicons.css';
+
+  .titlebar {
+    -webkit-app-region: drag;
+
+    width: 100%;
+    padding: 5px;
+    background-color: rgba(0, 0, 0, 0.2);
+    position: relative;
+
+    .title {
+      text-align: center;
+    }
+    .title-bar-btns {
+      position: absolute;
+      background-color: unset;
+      right: 0px;
+      top: 0px;
+      
+      button {
+        background-color: transparent;
+        -webkit-app-region: no-drag;
+        padding: 7px 20px;
+        border: none;
+        cursor: pointer;
+        color: white;
+        transition: background-color 150ms linear;
+
+        &:focus {
+            outline: none;
+            border: none;
+        }
+
+        &#min-btn:hover {
+            background-color: rgba(255, 255, 255, .2);
+        }
+
+        &#max-btn:hover {
+            background-color: rgba(255, 255, 255, .2);
+        }
+
+        &#close-btn:hover {
+            background-color: #c62828;
+        }
+      }
+    }
+  }
+</style>

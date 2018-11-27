@@ -20,6 +20,7 @@
     </template>
     <!-- TODO: scroll shadow https://vuescrolljs.yvescoding.org/guide/event.html#handle-resize -->
     <el-tree
+      ref="tree"
       :allow-drop="allowDrop"
       :allow-drag="allowDrag"
       :data="value"
@@ -27,16 +28,19 @@
       draggable
       empty-text="No Items"
       highlight-current
-      node-key="id">
-      <div slot-scope="{ node, data }" class="tree-node">
+      node-key="id"
+      @current-change="data => itemSelected(data.id)">
+      <div slot-scope="{ data, node }" class="tree-node">
         <i :class="itemIcon" class="mdi tree-icon"/>
         <span>{{ node.label }}</span>
         <div class="spacer"/>
-        <el-popover :title="'Edit ' + itemName ">
-          <el-button v-tooltip="'Rename'" type="warning" @click="confirmRenameItem(node, data)"><i class="mdi mdi-rename-box"/></el-button>
-          <el-button v-tooltip="'Delete'" type="danger" @click="confirmDeleteItem(node, data)"><i class="mdi mdi-delete"/></el-button>
-          <el-button slot="reference"><i class="mdi mdi-dots-vertical"/></el-button>
-        </el-popover>
+        <BlurredPopover :ref="'editItemPopover_'+data.id" :title="'Edit ' + itemName" :width="200" :height="100">
+          <el-button-group class="block">
+            <el-button v-tooltip="'Rename'" type="warning" @click="confirmRenameItem(data)"><i class="mdi mdi-rename-box"/></el-button>
+            <el-button v-tooltip="'Delete'" type="danger" @click="confirmDeleteItem(data, node)"><i class="mdi mdi-delete"/></el-button>
+          </el-button-group>
+          <el-button slot="reference" @click.stop><i class="mdi mdi-dots-vertical"/></el-button>
+        </BlurredPopover>
       </div>
     </el-tree>
     <!-- TODO: fix style -->
@@ -53,8 +57,8 @@
 </template>
 
 <script>
+  import { mapActions, mapState } from 'vuex'
   import BlurredPopover from './standalone/BlurredPopover'
-  const uuidv4 = require('uuid/v4');
 
   export default {
     name: 'SideTreeBrowser',
@@ -73,61 +77,96 @@
         renameDialogData: {}
       }
     },
+    computed: {
+      ...mapState({
+        openProcedure: state => state.procedures.openProcedure
+      })
+    },
+    watch: {
+      openProcedure(procedure) {
+        // if a different procedure has been selected in a different tree, clear our selected one
+        const currentKey = this.$refs.tree.getCurrentKey()
+        if(currentKey != null && currentKey != procedure) {
+          this.$refs.tree.setCurrentKey(null)
+        }
+      }
+    },
+    mounted() {
+      // if a procedure was recorded as open, reselect it
+      for(let i in this.value) {
+        if(this.value[i].id == this.openProcedure) {
+          this.$emit('item-selected', this.value[i].id)
+          this.$refs.tree.setCurrentKey(this.value[i].id)
+          break;
+        }
+      }
+    },
     methods: {
+      ...mapActions(['setOpenProcedure']),
       allowDrag() {
         return true;
       },
-      allowDrop() { // TODO: restrict to folders
-        return true;
+      allowDrop() { // TODO: allow folders
+        return false;
       },
       showAddItem(event) {
         event.stopPropagation();
         setTimeout(() => {this.$refs.addItemPopoverTextbox.focus()}, 150);
       },
       addItem() {
-        this.value.push({ label: this.addItemName, id: uuidv4() })
-        this.$emit('input', this.value);
-
+        this.$emit('add-item', this.addItemName)
         this.$refs.addItemPopover.hide();
         // wait a bit before clearing so that the user doesn't see an empty text box
         setTimeout(() => {this.addItemName = ""}, 300);
       },
-      confirmRenameItem(node, data) {
+      confirmRenameItem(data) {
+        this.$refs["editItemPopover_"+data.id].hide();
         this.renameDialogVisible = true;
         this.renameDialogNewName = data.label;
         this.renameDialogData = data;
         setTimeout(() => {this.$refs.renameDialogInput.focus()}, 150);
       },
       renameItemFromDialogInput() {
-        console.log("codmk")
+        // TODO: do rename properly by sending an event to the parent
         this.renameDialogData.label = this.renameDialogNewName;
 
         this.renameDialogVisible = false;
         this.renameDialogNewName = "";
         this.renameDialogData = {};
       },
-      confirmDeleteItem(node, data) {
+      confirmDeleteItem(data, node) {
+        this.$refs["editItemPopover_"+data.id].hide();
         this.$confirm("Are you sure want to delete " + this.itemName + " '" + data.label + "'?", '', {
             confirmButtonText: 'OK',
             cancelButtonText: 'Cancel',
             type: 'warning'
           })
-          .then(() => {this.deleteItem(node, data)})
+          .then(() => {this.deleteItem(data, node)})
           .catch(() => {});
       },
-      deleteItem(node, data) {
+      deleteItem(data, node) {
+        // TODO: do delete properly by sending an event to the parent
         const parent = node.parent;
         const children = parent.data.children || parent.data;
         const index = children.findIndex(d => d.id === data.id);
         children.splice(index, 1);
       },
+      selectItem(id) {
+        this.$refs.tree.setCurrentKey(id)
+        this.itemSelected(id)
+      },
+      itemSelected(id) {
+        // when the user selects an item, save it and update the application's state
+        if(id != this.openProcedure) {
+          this.$emit('item-selected', id)
+          this.setOpenProcedure(id)
+        }
+      }
     }
   }
 </script>
 
 <style lang="scss">
-  @import '~@mdi/font/css/materialdesignicons.css';
-
   .stb {
     .el-collapse-item__content {
       padding-left: 5px;
@@ -135,7 +174,7 @@
 
     .el-tree {
       background: unset;
-      color: unset;
+      color: white;
     }
     .el-tree-node__content {
       transition: background-color 150ms linear;
@@ -157,7 +196,8 @@
         flex-grow: 1;
       }
       button {
-        padding: unset;
+        padding: 5px;
+        margin-right: 0px;
       }
     }
     .tree-icon {

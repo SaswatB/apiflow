@@ -1,10 +1,11 @@
 module.exports = {
   root: true,
   parserOptions: {
-    parser: 'babel-eslint',
+    parser: 'typescript-eslint-parser',
     sourceType: 'module',
     ecmaFeatures: {
-      legacyDecorators: true
+      legacyDecorators: true,
+      jsx: true
     }
   },
   env: {
@@ -37,6 +38,8 @@ module.exports = {
         "max": 1,
         "allowFirstLine": true
       }
-    }]
+    }],
+    // typescript automatically checks for unused vars
+    'no-unused-vars': 'off'
   }
 }

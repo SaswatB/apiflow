@@ -1,3 +1,5 @@
 test/unit/coverage/**
 test/unit/*.js
 test/e2e/*.js
+#TODO: fix typescript jsx parser
+src/renderer/components/standalone/MorphingCollapse.vue

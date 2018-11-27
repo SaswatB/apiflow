@@ -1,7 +1,7 @@
 <template>
   <el-input
     :placeholder="placeholder"
-    :value="value.text"
+    :value="value.value"
     :class="!value.linked ? '' : 'linked'"
     :disabled="value.linked"
     class="linked-input"
@@ -15,36 +15,36 @@
   </el-input>
 </template>
 
-<script>
-  export default {
-    name: 'LinkedInput',
-    props: { fieldName: { type: String, required: true }, value: {type: Object, required: true} },
-    data() {
-      return {
-        tempValue: '' //used to hold value.text if the user clicks link, is not persisted
+
+<script lang="ts">
+  import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
+  import { ProcedureLinkedValue } from '../../model/Procedure'
+
+  @Component({})
+  export default class LinkedInput extends Vue {
+    @Prop(String) fieldName!: string
+    @Prop(Object) value!: ProcedureLinkedValue
+
+    tempValue = '' //used to hold value.value if the user clicks link, is not persisted
+
+    //TODO: animate this text change
+    get placeholder() { return this.fieldName + (!this.value.linked ? "" : " - Linked") }
+
+    updateValueText(newText: string) {
+      this.value.value = newText;
+      this.$emit('input', this.value);
+    }
+
+    updateValuelinked(linked: boolean) {
+      this.value.linked = linked;
+      if(linked) {
+        this.tempValue = this.value.value;
+        this.value.value = "";
+      } else {
+        this.value.value = this.tempValue;
+        this.tempValue = "";
       }
-    },
-    computed: {
-      placeholder() {
-        return this.fieldName + (!this.value.linked ? "" : " - Linked") //todo animate this text change
-      }
-    },
-    methods: {
-      updateValueText(text) {
-        this.value.text = text;
-        this.$emit('input', this.value);
-      },
-      updateValuelinked(linked) {
-        this.value.linked = linked;
-        if(linked) {
-          this.tempValue = this.value.text;
-          this.value.text = "";
-        } else {
-          this.value.text = this.tempValue;
-          this.tempValue = "";
-        }
-        this.$emit('input', this.value);
-      }
+      this.$emit('input', this.value);
     }
   }
 </script>

@@ -25,10 +25,11 @@ function createWindow () {
     width: 1300,
     useContentSize: true,
     webPreferences: {
-      experimentalFeatures: true
+      experimentalFeatures: true,
+      webSecurity: false // TODO: disable
     }
     // Remove the window frame from windows applications
-    // frame: false,
+    // frame: false, // TODO: uncomment
     // Hide the titlebar from MacOS applications while keeping the stop lights
     // titleBarStyle: 'hidden',
   })

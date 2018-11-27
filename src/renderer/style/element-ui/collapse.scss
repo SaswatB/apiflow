@@ -2,6 +2,7 @@ $--collapse-header-fill: unset;
 $--collapse-header-color: unset;
 $--collapse-header-hover-fill: $--color-hover; //TODO: make a var
 $--collapse-content-fill: unset;
+$--collapse-content-color: unset;
 $--collapse-border-color: #ffffff61;
 @import "element-ui/packages/theme-chalk/src/collapse.scss";
 

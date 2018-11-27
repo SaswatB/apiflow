@@ -5,9 +5,11 @@ $--button-hover-fill: $--color-hover;
 
 @include b(button)  {
     border-radius: 4px;
-    transition: background-color 150ms linear, text-shadow 150ms linear, color 150ms linear;
+    border-color: #ffffff61;
+    transition: background-color 150ms linear, text-shadow 150ms linear, color 150ms linear, border-color 150ms linear;
 
     &:hover, &:focus {
+        border-color: white;
         color: $--button-default-color;
         background-color: $--button-hover-fill;
         text-shadow: $--button-default-color 0 0 10px;

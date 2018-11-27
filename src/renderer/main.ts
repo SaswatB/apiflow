@@ -10,12 +10,8 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 
-import './codemirror/javascript'
-import './style/main.scss'
-
-import 'codemirror/lib/codemirror.css'
-import 'codemirror/theme/base16-dark.css'
 import 'vuescroll/dist/vuescroll.css';
+import './style/main.scss'
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'))
 Vue.config.productionTip = false

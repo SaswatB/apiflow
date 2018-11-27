@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
-    "paths": { "*": ["types/*"] },
+    "paths": { "*": ["types/*"], "@":["src/main", "src/renderer"] },
     "outDir": "./build/",
     "sourceMap": true,
     "strict": true,
@@ -12,8 +12,9 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "moduleResolution": "node",
-    "target": "es5",
-    "lib": ["es2016", "dom"]
+    "target": "es2015",
+    "lib": ["es2016", "dom"],
+
   },
   "include": ["./src/**/*", "types/vue-shims.d.ts"]
 }

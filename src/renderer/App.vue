@@ -6,8 +6,7 @@
 </template>
 
 <script lang="ts">
-  import Vue from 'vue'
-  import Component from 'vue-class-component'
+  import { Vue, Component } from 'vue-property-decorator'
   import TitleBar from './components/standalone/TitleBar.vue'
 
   @Component({components: {TitleBar}})

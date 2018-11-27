@@ -1,3 +1,4 @@
+@import '~@mdi/font/css/materialdesignicons.css';
 @import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro');
 @import "./element-ui/index.scss";
 @import "./tooltip.scss";
@@ -11,6 +12,10 @@
 body {
     font-family: 'Source Sans Pro', sans-serif;
     color: white;
+}
+
+.CodeMirror.CodeMirror-empty {
+    color: #c0c4cc;
 }
 
 .tree-title {
@@ -31,10 +36,18 @@ body {
     color: rgb(160, 160, 160)
 }
 
+.el-button-group.block {
+    width: 100%;
+    display: flex;
+    .el-button {
+        flex-grow: 1;
+    }
+}
+
 //TODO: properly style dialogs
 //custom style for dialog
-.el-dialog {
 
+.el-dialog {
     input,
     button {
         color: black;

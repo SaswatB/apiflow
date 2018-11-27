@@ -11,38 +11,32 @@
   </div>
 </template>
 
-<script>
-  const BrowserWindow = require('electron').remote.getCurrentWindow();
+<script lang="ts">
+  import { Vue, Component, Prop } from 'vue-property-decorator'
+  import { remote } from 'electron'
+  const BrowserWindow = remote.getCurrentWindow();
 
-  export default {
-    name: 'TitleBar',
-    props: {
-      title: {
-        type: String,
-        required: true
+  @Component({})
+  export default class TitleBar extends Vue {
+    @Prop(String) title!: string
+
+    minimize() {
+      BrowserWindow.minimize();
+    }
+    maximize() {
+      if (!BrowserWindow.isMaximized()) {
+        BrowserWindow.maximize();
+      } else {
+        BrowserWindow.unmaximize();
       }
-    },
-    methods: {
-      minimize() {
-        BrowserWindow.minimize();
-      },
-      maximize() {
-        if (!BrowserWindow.isMaximized()) {
-          BrowserWindow.maximize();
-        } else {
-          BrowserWindow.unmaximize();
-        }
-      },
-      appClose() {
-        BrowserWindow.close();
-      }
+    }
+    appClose() {
+      BrowserWindow.close();
     }
   }
 </script>
 
 <style lang="scss">
-  @import '~@mdi/font/css/materialdesignicons.css';
-
   .titlebar {
     -webkit-app-region: drag;
 
@@ -54,6 +48,7 @@
     .title {
       text-align: center;
     }
+
     .title-bar-btns {
       position: absolute;
       background-color: unset;
@@ -73,15 +68,9 @@
             outline: none;
             border: none;
         }
-
-        &#min-btn:hover {
+        &#min-btn:hover, &#max-btn:hover {
             background-color: rgba(255, 255, 255, .2);
         }
-
-        &#max-btn:hover {
-            background-color: rgba(255, 255, 255, .2);
-        }
-
         &#close-btn:hover {
             background-color: #c62828;
         }

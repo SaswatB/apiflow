@@ -77,7 +77,6 @@
         const fromPosition = this.getPosition(from.element);
         fromPosition.top = (fromPosition.top.replace('px', '') - parentPosition.top) + "px";
         fromPosition.left = (fromPosition.left.replace('px', '') - parentPosition.left) + "px";
-        console.log(fromPosition);
         Object.assign(clone.style, fromPosition);
         fromParent.appendChild(clone);
         //have vue remove the original element
@@ -123,7 +122,6 @@
 
 <style lang="scss">
   .morphing-collapse .el-collapse-item__content {
-    padding-left: 40px;
     transition: height 150ms linear;
     position: relative;
   }

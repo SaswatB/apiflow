@@ -8,7 +8,6 @@ export enum RequestMethod {
 export enum RequestAuthenticationType {
   None = "None",
   Basic = "Basic",
-  Digest = "Digest",
   Bearer = "Bearer"
 }
 
@@ -31,6 +30,7 @@ export class Request implements Procedure {
   authType = RequestAuthenticationType.None
   authSimpleUsername: string // ProcedureLinkedValue
   authSimplePassword: string // ProcedureLinkedValue
+  authToken: string // ProcedureLinkedValue
   //headers
   headers:Array<{key: number, name: string, value: string}> = []//name: ProcedureLinkedValue, value: authSimpleUsername
   //payload
@@ -38,19 +38,20 @@ export class Request implements Procedure {
   jsonPayload = "" //ace editor doesn't like undefined
   response = {}
 
-  private constructor(id:string, name: string, authSimpleUsername: string, authSimplePassword: string) {
+  private constructor(id:string, name: string, authSimpleUsername: string, authSimplePassword: string, authToken: string) {
     this.id = id
     this.name = name
     this.authSimpleUsername = authSimpleUsername
     this.authSimplePassword = authSimplePassword
+    this.authToken = authToken
   }
 
   static newRequest(id:string, name: string) {
-    return new Request(id, name, newLinkedValueId(), newLinkedValueId());
+    return new Request(id, name, newLinkedValueId(), newLinkedValueId(), newLinkedValueId());
   }
 
   static placeholder() {
-    return new Request("","","","");
+    return new Request("","","","", "");
   }
 
   static migrate(obj: any) {

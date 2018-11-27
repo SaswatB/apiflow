@@ -36,7 +36,7 @@
                 </div>
               </template>
               <template slot="subSlot3">
-                <div v-if="authenticationTypeIsBearer"><el-input v-model="value.authBearer" placeholder="Token" required/></div>
+                <div v-if="authenticationTypeIsToken"><StoredLinkedInput :link-id="value.authToken" field-name="Token" required/></div>
               </template>
             </MorphingCollapse>
             <!-- Headers Form -->
@@ -134,8 +134,8 @@
     get methodOptions() { return Object.keys(RequestMethod).map(k => RequestMethod[k as any]); }
 
     get authenticationTypeIsNone() { return this.value.authType === RequestAuthenticationType.None }
-    get authenticationTypeIsSimple() { return this.value.authType === RequestAuthenticationType.Basic || this.value.authType === RequestAuthenticationType.Digest }
-    get authenticationTypeIsBearer() { return this.value.authType === RequestAuthenticationType.Bearer }
+    get authenticationTypeIsSimple() { return this.value.authType === RequestAuthenticationType.Basic }
+    get authenticationTypeIsToken() { return this.value.authType === RequestAuthenticationType.Bearer }
     get authenticationOptions() { return Object.keys(RequestAuthenticationType).map(k => RequestAuthenticationType[k as any]); }
 
     get payloadTypeIsNone() { return this.value.payloadType === RequestPayloadType.None }
@@ -211,6 +211,14 @@
         if(nameLink != undefined && valueLink != undefined) { //TODO: pass headers against a regex
           args.headers[nameLink.value] = valueLink.value
         }
+      }
+      if(this.value.authType === RequestAuthenticationType.Basic) {
+        const usernameLink = this.ProceduresStore.linkedValues[this.value.authSimpleUsername]
+        const passwordLink = this.ProceduresStore.linkedValues[this.value.authSimplePassword]
+        args.headers["Authorization"] = "Basic " + btoa(usernameLink.value + ":" + passwordLink.value);
+      } else if(this.value.authType === RequestAuthenticationType.Bearer) {
+        const tokenLink = this.ProceduresStore.linkedValues[this.value.authToken]
+        args.headers["Authorization"] = "Bearer " + tokenLink.value;
       }
       axios(args).then((response) => {
         this.value.response = response

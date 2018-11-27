@@ -25,7 +25,7 @@
         activeForms: [],
         methodOptions: ['GET','POST'],
         methodValue: '',
-        authenticationOptions: ['None','Basic','Digest','Bearer'],
+        authenticationOptions: ['None','Basic','Bearer'],
         authenticationType: 'None',
         simpleAuthUsername: { text: '', linked: false},
         simpleAuthPassword: {text: '', linked: false},

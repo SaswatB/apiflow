@@ -96,7 +96,6 @@
   import { getModule } from 'vuex-module-decorators'
   import AceEditor from 'vue2-ace-editor'
   const difference = require('lodash/difference')
-  import axios from 'axios'
   const beautify = require('js-beautify').js
 
   const ace = require('brace');
@@ -199,32 +198,30 @@
       }
     }
 
-    sendRequest() {
-      // TODO: validate arguments
-      let args:any = { method: this.method, url: this.value.url, headers: {} }
-      if(this.payloadTypeIsJSON) {
-        args.data = JSON.parse(this.value.jsonPayload)
-      }
-      for(let i in this.value.headers){//TODO: properly resolve linked values
-        const nameLink = this.ProceduresStore.linkedValues[this.value.headers[i].name]
-        const valueLink = this.ProceduresStore.linkedValues[this.value.headers[i].value]
-        if(nameLink != undefined && valueLink != undefined) { //TODO: pass headers against a regex
-          args.headers[nameLink.value] = valueLink.value
+    constructLinkedValuesMap(linkedValueIds: Array<string>) {
+      let linkedValues:{[index:string]:string} = {};
+      for(let i in linkedValueIds) {
+        const link = this.ProceduresStore.linkedValues[linkedValueIds[i]]
+        if(link !== undefined) {
+          linkedValues[linkedValueIds[i]] = link.value;
         }
       }
-      if(this.value.authType === RequestAuthenticationType.Basic) {
-        const usernameLink = this.ProceduresStore.linkedValues[this.value.authSimpleUsername]
-        const passwordLink = this.ProceduresStore.linkedValues[this.value.authSimplePassword]
-        args.headers["Authorization"] = "Basic " + btoa(usernameLink.value + ":" + passwordLink.value);
-      } else if(this.value.authType === RequestAuthenticationType.Bearer) {
-        const tokenLink = this.ProceduresStore.linkedValues[this.value.authToken]
-        args.headers["Authorization"] = "Bearer " + tokenLink.value;
+      return linkedValues
+    }
+
+    sendRequest() {
+      // TODO: validate arguments
+      let linkedValueIds = [];
+
+      for(let i in this.value.headers) {
+        linkedValueIds.push(this.value.headers[i].name);
+        linkedValueIds.push(this.value.headers[i].value);
       }
-      axios(args).then((response) => {
-        this.value.response = response
-      }).catch((error) => {
-        this.value.response = error
-      });
+      linkedValueIds.push(this.value.authSimpleUsername);
+      linkedValueIds.push(this.value.authSimplePassword);
+      linkedValueIds.push(this.value.authToken);
+
+      this.value.sendRequest(this.constructLinkedValuesMap(linkedValueIds));
     }
   }
 </script>

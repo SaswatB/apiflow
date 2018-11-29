@@ -1,4 +1,5 @@
 import { Procedure, ProcedureLinkedValue, newLinkedValueId } from './Procedure'
+import axios from 'axios'
 
 export enum RequestMethod {
   Get = "GET",
@@ -58,5 +59,37 @@ export class Request implements Procedure {
     const req = Request.placeholder();
     Object.assign(req, obj); //TODO: proper migrations
     return req;
+  }
+
+
+  sendRequest(linkedValues: {[index: string]: string}) {
+    let args:any = { method: this.method, url: this.url, headers: {} }
+    if(this.payloadType === RequestPayloadType.JSON) {
+      args.data = JSON.parse(this.jsonPayload)
+    }
+    for(let i in this.headers){
+      const nameLink = linkedValues[this.headers[i].name]
+      const valueLink = linkedValues[this.headers[i].value]
+      if(nameLink !== undefined && valueLink !== undefined) {
+        args.headers[nameLink] = valueLink
+      }
+    }
+    if(this.authType === RequestAuthenticationType.Basic) {
+      const usernameLink = linkedValues[this.authSimpleUsername]
+      const passwordLink = linkedValues[this.authSimplePassword]
+      if(usernameLink !== undefined && passwordLink !== undefined) {
+        args.headers["Authorization"] = "Basic " + btoa(usernameLink + ":" + passwordLink);
+      }
+    } else if(this.authType === RequestAuthenticationType.Bearer) {
+      const tokenLink = linkedValues[this.authToken]
+      if(tokenLink !== undefined) {
+        args.headers["Authorization"] = "Bearer " + tokenLink;
+      }
+    }
+    axios(args).then((response) => {
+      this.response = response
+    }).catch((error) => {
+      this.response = error
+    });
   }
 }

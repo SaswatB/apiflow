@@ -105,6 +105,10 @@
     draggedLink: any
     dragListener!: d3.DragBehavior<SVGGElement, any, {} | d3.SubjectPosition>
     playNodeLocation?: {x:number, y:number}
+    // panning support
+    scrollDx = 0
+    scrollDy = 0
+    scrollTimer?: number = undefined
 
     mounted() {
       // define the baseSvg and its main content groups
@@ -158,6 +162,9 @@
       this.refreshNodes();
     }
 
+    destroyed() {
+      clearInterval(this.scrollTimer);
+    }
 
     addSidebarBtn(x: number, y: number, icon: string) {
       let btn = this.sidebarGroup.append("g")
@@ -286,7 +293,8 @@
       
       let nodeUpdate = nodes.transition()
         .duration(duration)
-        .attr("transform", nodeTransform);
+        .attr("transform", nodeTransform)
+        .attr("opacity", 1); // there was an issue where adding multiple nodes quickly would leave some faded, this opacity set fixes that
 
       // get the play node location as new nodes will spawn from it
       for(let i in this.dagNodes) {
@@ -410,15 +418,19 @@
 
       // panning at screen edge
       const edgeBuffer = 50; // how far from the edge before we start scrolling
-      let dx = undefined, dy = undefined;
       let mousePos = d3.mouse(this.$el)
-      if(mousePos[0] < edgeBuffer) dx = -30;
-      if(mousePos[0] > this.$el.clientWidth - edgeBuffer) dx = 30;
-      if(mousePos[1] < edgeBuffer) dy = -30;
-      if(mousePos[1] > this.$el.clientHeight - edgeBuffer) dy = 30;
+      if(mousePos[0] < edgeBuffer) this.scrollDx = mousePos[0] - edgeBuffer;
+      else if(mousePos[0] > this.$el.clientWidth - edgeBuffer) this.scrollDx = mousePos[0] - this.$el.clientWidth + edgeBuffer;
+      else this.scrollDx = 0;
+      if(mousePos[1] < edgeBuffer) this.scrollDy = mousePos[1] - edgeBuffer;
+      else if(mousePos[1] > this.$el.clientHeight - edgeBuffer) this.scrollDy = mousePos[1] - this.$el.clientHeight + edgeBuffer;
+      else this.scrollDy = 0;
 
-      if(dx != undefined || dy != undefined)
-        (this.$refs.graphScroll as any).scrollBy({dx, dy})
+      if((this.scrollDx != 0 || this.scrollDy != 0) && this.scrollTimer == undefined) {
+        this.scrollTimer = setInterval(
+          () => {(this.$refs.graphScroll as any).scrollBy({dx: this.scrollDx, dy: this.scrollDy})},
+          50);
+      }
     }
     endDrag(d: any, domNode: Element) {
       if(d.id == rootNodeId) return;
@@ -465,6 +477,14 @@
         this.draggedLink.attr("opacity", 1).transition().duration(fastDuration).attr("opacity", 0).remove();
       }
       this.draggedLink = undefined;
+
+      // clear panning
+      if(this.scrollTimer != undefined) {
+        clearInterval(this.scrollTimer);
+        this.scrollTimer = undefined
+        this.scrollDx = 0;
+        this.scrollDy = 0;
+      }
     }
     overNode(d: any, domNode: Element) {
       // add a glow effect when the user hovers over

@@ -168,7 +168,6 @@
 
     .content {
       height: 100%;
-      padding: 12px;
     }
 
     .gutter {

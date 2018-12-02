@@ -229,6 +229,7 @@
 <style lang="scss">
   .request-pane {
     height: 100%;
+    padding: 12px;
 
     .__view {
       min-height: unset !important; // TODO: look into why this is needed for scrolling

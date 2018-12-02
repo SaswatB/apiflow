@@ -1,6 +1,6 @@
 <template>
   <div class="flow-pane">
-    hi
+    <DragDropGraph/>
   </div>
 </template>
 
@@ -8,10 +8,15 @@
   import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
   import { getModule } from 'vuex-module-decorators'
 
-  @Component({ components: {} })
+  import DragDropGraph from '../standalone/DragDropGraph.vue'
+
+  @Component({ components: { DragDropGraph } })
   export default class FlowEditor extends Vue {
   }
 </script>
 
 <style lang="scss">
+  .flow-pane {
+    height: 100%;
+  }
 </style>

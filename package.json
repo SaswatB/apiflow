@@ -57,10 +57,13 @@
   },
   "dependencies": {
     "@mdi/font": "^3.0.39",
+    "@types/d3": "^5.0.1",
     "@types/lodash": "^4.14.118",
     "@types/uuid": "^3.4.4",
     "axios": "^0.18.0",
     "codemirror": "^5.42.0",
+    "d3": "^5.7.0",
+    "d3-dag": "^0.1.2",
     "element-ui": "^2.4.10",
     "js-beautify": "^1.8.8",
     "lodash": "^4.17.11",

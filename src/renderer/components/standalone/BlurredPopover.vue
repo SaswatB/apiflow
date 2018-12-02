@@ -15,8 +15,8 @@
 </template>
 
 <script lang="ts">
-  import { Vue, Component, Prop } from 'vue-property-decorator'
-  import ElPopover2 from '../../libs/element-ui/ElPopover2.vue' // TODO: properly reference this
+  import { Vue, Component, Prop } from "vue-property-decorator"
+  import ElPopover2 from "@/libs/element-ui/ElPopover2.vue"
 
   @Component({ components: { ElPopover2 } })
   export default class BlurredPopover extends Vue {

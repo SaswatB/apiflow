@@ -1,9 +1,9 @@
 <template>
   <div class="frame">
-    <Split :gutter-size="8">
+    <Split :gutter-size="2">
       <!-- TODO: limit and persist split -->
       <!-- Sidebar -->
-      <SplitArea :size="25">
+      <SplitArea :size="25" :min-size="200">
         <vue-scroll :ops="{ scrollPanel: { scrollingX: false } }" class="sidebar">
           <div class="sidebar-content">
             <el-select v-model="currentProject" placeholder="Project">
@@ -42,20 +42,20 @@
 </template>
 
 <script lang="ts">
-  import { Vue, Component, Watch } from 'vue-property-decorator'
-  import { getModule } from 'vuex-module-decorators'
-  import { v4 as uuidv4 } from 'uuid';
-  // import clonedeep from 'lodash/cloneDeep';
-  const clonedeep = require('lodash.clonedeep')
+  import { Vue, Component, Watch } from "vue-property-decorator"
+  import { getModule } from "vuex-module-decorators"
+  import { v4 as uuidv4 } from "uuid";
+  const clonedeep = require("lodash.clonedeep")
 
-  import { Procedure, ProcedureMap, ProcedureFolderItemType, ProcedureRootFolderName, ProcedureFolderMap } from '../model/Procedure'
-  import { Request } from '../model/Request'
-  import Procedures from '../store/modules/Procedures' // TODO: fix reference to use @
-  import Counter from '../store/modules/Counter'
+  import { Procedure, ProcedureMap, ProcedureFolderItemType, ProcedureRootFolderName, ProcedureFolderMap } from "../model/Procedure"
+  import { Flow } from "@/model/Flow"
+  import { Request } from "@/model/Request"
+  import Procedures from "@/store/modules/Procedures" // TODO: fix reference to use @
+  import Counter from "@/store/modules/Counter"
 
-  import SideTreeBrowser from './SideTreeBrowser.vue'
-  import RequestEditor from './editors/RequestEditor.vue'
-  import FlowEditor from './editors/FlowEditor.vue'
+  import SideTreeBrowser from "./SideTreeBrowser.vue"
+  import RequestEditor from "./editors/RequestEditor.vue"
+  import FlowEditor from "./editors/FlowEditor.vue"
 
   function mapToTree(map: ProcedureMap, folders:ProcedureFolderMap, folderName:string = ProcedureRootFolderName): Array<object> {
     const arr = [];
@@ -78,14 +78,14 @@
     ProceduresStore = getModule(Procedures, this.$store)
     CounterStore = getModule(Counter, this.$store)
     projects = [ //TODO: persist
-      { value: 'Project1', label: 'Project1' }
+      { value: "Project1", label: "Project1" }
     ]
-    currentProject = 'Project1' //TODO: persist
-    activeTrees = ['Flows', 'Requests'] //TODO: persist
+    currentProject = "Project1" //TODO: persist
+    activeTrees = ["Flows", "Requests"] //TODO: persist
     flowTree: Array<object> = []
     requestTree: Array<object> = []
-    editorType = ''
-    flowEdit:Procedure = {id:'0', name:'0'}
+    editorType = ""
+    flowEdit:Flow = Flow.placeholder()
     requestEdit:Request = Request.placeholder()
 
     created() {
@@ -97,19 +97,19 @@
     get flowsCommitId() { return this.ProceduresStore.flowsCommitId; }
     get requestsCommitId() { return this.ProceduresStore.requestsCommitId; }
 
-    // @Watch('flowsCommitId')
+    // @Watch("flowsCommitId")
     refreshFlowTree() {
       this.flowTree = mapToTree(this.ProceduresStore.flows, this.ProceduresStore.flowFolders);
     }
-    // @Watch('requestsCommitId')
+    // @Watch("requestsCommitId")
     refreshRequestTree() {
       this.requestTree = mapToTree(this.ProceduresStore.requests, this.ProceduresStore.requestFolders);
     }
-    @Watch('flowEdit', {deep: true})
+    @Watch("flowEdit", {deep: true})
     saveFlowEdit() { 
       this.ProceduresStore.saveFlow(this.flowEdit);
     }
-    @Watch('requestEdit', {deep: true})
+    @Watch("requestEdit", {deep: true})
     saveRequestEdit() {
       console.log("e", this.requestEdit)
       this.ProceduresStore.saveRequest(this.requestEdit);
@@ -117,7 +117,7 @@
 
     addFlow(name: string) {
       let id = "Flow_"+uuidv4();
-      this.ProceduresStore.saveFlow({name, id});
+      this.ProceduresStore.saveFlow(Flow.newFlow(name, id));
       this.ProceduresStore.addFlowToFolder({flowId: id, folderName: ProcedureRootFolderName});
 
       // TODO: fix and replace with nextTick
@@ -135,11 +135,11 @@
     }
     flowSelected(id: string) {
       this.flowEdit = clonedeep(this.ProceduresStore.flows[id]);
-      this.editorType = 'flow';
+      this.editorType = "flow";
     }
     requestSelected(id: string) {
       this.requestEdit = Request.migrate(clonedeep(this.ProceduresStore.requests[id]));
-      this.editorType = 'request';
+      this.editorType = "request";
     }
   }
 </script>

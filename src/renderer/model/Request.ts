@@ -1,5 +1,5 @@
-import { Procedure, ProcedureLinkedValue, newLinkedValueId } from './Procedure'
-import axios from 'axios'
+import { Procedure, newLinkedValueId } from "./Procedure"
+import axios from "axios"
 
 export enum RequestMethod {
   Get = "GET",
@@ -52,7 +52,7 @@ export class Request implements Procedure {
   }
 
   static placeholder() {
-    return new Request("","","","", "");
+    return new Request("","","","","");
   }
 
   static migrate(obj: any) {

@@ -7,19 +7,22 @@
 </template>
 
 <script lang="ts">
-  import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
-  import { v4 as uuidv4 } from 'uuid'
+  import { Vue, Component, Prop, Watch } from "vue-property-decorator"
+  import { v4 as uuidv4 } from "uuid"
   import * as d3 from "d3"
   import * as d3dag from "d3-dag"
-  import { ResizeObserver as ResizeObserverType } from '@/../../types/ResizeObserver.d.ts'
+  import { ResizeObserver as ResizeObserverType } from "ResizeObserver.d.ts"
   declare var ResizeObserver: ResizeObserverType;
+
+  import { Flow } from "@/model/Flow"
 
   const rootNodeId = "root";
   const playNodeId = "play";
   const nodeRadius = 30;
-  const sideBarElementWidth = 100;
-  const sideBarElementHeight = 100;
-  const sideBarElementIconSize = 70;
+  const sideBarElementWidth = 60;
+  const sideBarElementHeight = 60;
+  const sideBarElementIconSize = 40;
+  const sideBarElementPadding = 5;
   const nodeIconSize = 40;
   const duration = 750; // default transition duration
   const fastDuration = 300;
@@ -79,7 +82,8 @@
   }
 
   @Component({ components: {} })
-  export default class DragDropGraph extends Vue {
+  export default class FlowDragDropGraph extends Vue {
+    @Prop(Object) value!: Array<NodeDatum>
     nodeData: Array<NodeDatum> = [{
       "id": rootNodeId,
       "icon": "\uF830", //shape
@@ -126,12 +130,11 @@
         .on("drag", (d, i, domNodes) => { this.updateDrag(d, domNodes[i]); })
         .on("end", (d, i, domNodes) => { this.endDrag(d, domNodes[i]); });
       
-      this.addSidebarBtn(0, 0, '\uF59F'); //web
-      //+10 for padding
-      this.addSidebarBtn(0, sideBarElementHeight + 10, '\uF7E4'); //pipe
-      this.addSidebarBtn(0, (sideBarElementHeight + 10) * 2, '\uF0F8'); //call-merge
-      this.addSidebarBtn(0, (sideBarElementHeight + 10) * 3, '\uF9BA'); //arrow-decision
-      this.addSidebarBtn(0, (sideBarElementHeight + 10) * 4, '\uF4B2'); //sleep
+      this.addSidebarBtn(0, 0, "\uF59F"); //web
+      this.addSidebarBtn(0, sideBarElementHeight + sideBarElementPadding, "\uF7E4"); //pipe
+      this.addSidebarBtn(0, (sideBarElementHeight + sideBarElementPadding) * 2, "\uF0F8"); //call-merge
+      this.addSidebarBtn(0, (sideBarElementHeight + sideBarElementPadding) * 3, "\uF9BA"); //arrow-decision
+      this.addSidebarBtn(0, (sideBarElementHeight + sideBarElementPadding) * 4, "\uF4B2"); //sleep
 
       // set up resizing response
       new ResizeObserver(this.resize).observe(this.$el)
@@ -169,7 +172,7 @@
     addSidebarBtn(x: number, y: number, icon: string) {
       let btn = this.sidebarGroup.append("g")
       this.addSidebarNodeElement(btn, x, y, icon, "rgba(0,0,0,.5)")
-      btn.attr('pointer-events', 'mouseover')
+      btn.attr("pointer-events", "mouseover")
         .on("mouseover", (d, i, domNodes) => { this.overSidebarNode(d, domNodes[i], x, y, icon); })
         .on("mouseout", (d, i, domNodes) => { this.outSidebarNode(d, domNodes[i]); })
       btn.call(d3.drag<SVGGElement, any>()
@@ -186,11 +189,11 @@
         .attr("width", sideBarElementWidth)
         .attr("height", sideBarElementHeight)
         .attr("fill", fill);
-      parent.append('text')
+      parent.append("text")
         .attr("class", "icon-text")
         .attr("x", x + sideBarElementWidth/2)
         .attr("y", y + sideBarElementHeight/2)
-        .attr('font-size', `${sideBarElementIconSize}px` )
+        .attr("font-size", `${sideBarElementIconSize}px` )
         .text(icon); 
     }
 
@@ -200,7 +203,7 @@
       let dag = d3dag.dratify()(this.nodeData);
       d3dag.sugiyama().layering(d3dag.layeringSimplex()).decross(d3dag.decrossOpt())(dag);
 
-      // calculate an acceptable size for the dag, this isn't perfect due to the strange ways the dag can get laid out
+      // calculate an acceptable size for the dag, this isn"t perfect due to the strange ways the dag can get laid out
       let dagWidth = 500, dagHeight = 300;
       let maxLayer = 1;
       let layerCount: Array<number> = []
@@ -233,16 +236,16 @@
         return d3.linkHorizontal()({ source, target });
       }
       const links = this.dagGroup
-        .selectAll('path')
+        .selectAll("path")
         .data(edges, (d: any) => { 
           return d != undefined ? d.source.id + ":" + d.target.id : "";
         })
 
       links.enter()
-        .append('path')
-        .attr('d', linkPath)
-        .attr('fill', 'none')
-        .attr('stroke', 'white')
+        .append("path")
+        .attr("d", linkPath)
+        .attr("fill", "none")
+        .attr("stroke", "white")
         .attr("marker-end", "url(#triangle)")
         .attr("display", "none")
         .transition()
@@ -251,7 +254,7 @@
 
       links.transition()
         .duration(duration)
-        .attr('d', linkPath);
+        .attr("d", linkPath);
 
       links.exit()
         .transition()
@@ -262,33 +265,33 @@
       // add nodes
       const nodeTransform = (d: any) => `translate(${d.x}, ${d.y})`
       const nodes = this.dagGroup
-        .selectAll('g')
+        .selectAll("g")
         .data(this.dagNodes, (d: any) => d != undefined ? d.id : "");
 
       const nodeEnter = nodes.enter()
-        .append('g')
+        .append("g")
         .call(this.dragListener)
         .on("mouseover", (d, i, domNodes) => { this.overNode(d, domNodes[i]); })
         .on("mouseout", (d, i, domNodes) => { this.outNode(d, domNodes[i]); });
-      nodeEnter.append('circle')
-        .attr('r', nodeRadius)
-        .attr('fill', 'rgba(0,0,0,.5)')
-        .attr('stroke', 'white')
-        .style('cursor', 'pointer')
-      nodeEnter.append('text')
+      nodeEnter.append("circle")
+        .attr("r", nodeRadius)
+        .attr("fill", "rgba(0,0,0,.5)")
+        .attr("stroke", "white")
+        .style("cursor", "pointer")
+      nodeEnter.append("text")
         .attr("class", "icon-text")
-        .attr('font-size', `${nodeIconSize}px` )
+        .attr("font-size", `${nodeIconSize}px` )
         .text((d: any) => d.data.icon);
       if(this.playNodeLocation != undefined) {
         nodeEnter
           .attr("opacity", 0)
-          .attr('transform', nodeTransform(this.playNodeLocation))
+          .attr("transform", nodeTransform(this.playNodeLocation))
           .transition()
             .duration(duration)
             .attr("opacity", 1)
-            .attr('transform', nodeTransform)
+            .attr("transform", nodeTransform)
       } else {
-        nodeEnter.attr("opacity", 1).attr('transform', nodeTransform)
+        nodeEnter.attr("opacity", 1).attr("transform", nodeTransform)
       }
       
       let nodeUpdate = nodes.transition()
@@ -307,7 +310,9 @@
 
     // responsive callback, resizes the svg and reponsitions elements based on space
     resize() {
+      console.log("resize")
       const graphTopBottomPadding = 10, graphRightPadding = 10, graphLeftPadding = 10;
+      const sideBarTopPadding = 10, sideBarBottomPadding = 10, sideBarLeftPadding = 10;
       // get the on screen sizes of all the responsive elements
       const offset = this.baseSvg.node()!.getBoundingClientRect();
       const gSize = this.dagGroup.node()!.getBoundingClientRect();
@@ -315,7 +320,7 @@
       const sideBarOffsetX = sideBarElementWidth + nodeRadius + graphLeftPadding // +10 for left padding
       // compute and set a new height and width for the svg based on the container
       this.width = Math.max(this.$el.clientWidth, gSize.width + sideBarOffsetX + graphRightPadding);
-      this.height = Math.max(this.$el.clientHeight - 5, gSize.height + (graphTopBottomPadding*2)); // -5 for scrolling
+      this.height = Math.max(this.$el.clientHeight - 5, gSize.height + (graphTopBottomPadding*2), sSize.height + sideBarTopPadding + sideBarBottomPadding); // -5 for scrolling
       this.baseSvg.attr("width", this.width).attr("height", this.height);
       // keep the graph center, but don't let it overlap with the sidebar
       // the graph isn't always center in its group so we use the computed offset of the dagGroup, minus the offset of the svg itself, minus the previous offset attempt, to calculate the center offset
@@ -324,7 +329,8 @@
       this.dagGroup.style("transform", "translate("+(this.dagGroup as any).x+"px, "+(this.dagGroup as any).y+"px)");
       this.dagOverlayGroup.style("transform", "translate("+(this.dagGroup as any).x+"px, "+(this.dagGroup as any).y+"px)");
       // set the sidebar to be vertically centered on the left
-      this.sidebarGroup.style("transform", "translate(0px, " + ((this.$el.clientHeight-sSize.height)/2) + "px)"); // using clientHeight directly to avoid the sidebar moving if the graph requires scrolling
+      let sgY = Math.max((this.$el.clientHeight-sSize.height)/2, sideBarTopPadding); // using clientHeight directly to avoid the sidebar moving if the graph requires scrolling
+      this.sidebarGroup.style("transform", "translate(" + sideBarLeftPadding + "px, " + sgY + "px)"); 
     }
 
     // side bar button mouse handlers
@@ -353,6 +359,8 @@
         "parentIds": [rootNodeId]
       })
       this.refreshNodes();
+      this.$emit("input", this.value);
+
       // hide the clone
       this.sidebarClone.attr("opacity", 1).transition().duration(fastDuration).attr("opacity", 0).remove();
       this.sidebarClone = undefined;
@@ -362,10 +370,10 @@
       let node = d3.select(domNode)
       if(node.select(".glow").size() == 0) {
         node.insert("text","text")
-        .attr('class', 'glow icon-text')
+        .attr("class", "glow icon-text")
         .attr("x", x + sideBarElementWidth/2)
         .attr("y", y + sideBarElementHeight/2)
-        .attr('font-size', `${sideBarElementIconSize}px`)
+        .attr("font-size", `${sideBarElementIconSize}px`)
         .style("filter", "url(#glow)")
         .text(icon)
         .attr("opacity", 0).transition().duration(fastDuration).attr("opacity", 1);
@@ -394,10 +402,10 @@
         source: [d.x + nodeRadius, d.y],
         target: d3.mouse(this.dagGroup.node()!)
       }
-      this.draggedLink.append('path')
-        .attr('d', this.dragPath(this.draggedLink.d))
-        .attr('fill', 'none')
-        .attr('stroke', 'white')
+      this.draggedLink.append("path")
+        .attr("d", this.dragPath(this.draggedLink.d))
+        .attr("fill", "none")
+        .attr("stroke", "white")
         .attr("marker-end", "url(#triangle)")
         .attr("opacity", 0)
         .attr("pointer-events", "none")
@@ -414,7 +422,7 @@
       } else {
         this.draggedLink.d.target = d3.mouse(this.dagGroup.node()!)
       }
-      this.draggedLink.select('path').attr('d', this.dragPath(this.draggedLink.d));
+      this.draggedLink.select("path").attr("d", this.dragPath(this.draggedLink.d));
 
       // panning at screen edge
       const edgeBuffer = 50; // how far from the edge before we start scrolling
@@ -452,6 +460,7 @@
               this.selectedNode.data.parentIds.shift();
             }
             this.refreshNodes();
+            this.$emit("input", this.value);
             mergeLink = true;
           } else {
             this.selectedNode.data.parentIds.pop();
@@ -472,7 +481,7 @@
             this.draggedLink.d.target = [this.dagNodes[i].x - nodeRadius - 7, this.dagNodes[i].y];
         }
         // transition with a cut, note that this line uses a different curve then the permanent one so there may be glitches
-        this.draggedLink.select('path').transition().duration(duration).attr('d', this.dragPath(this.draggedLink.d)).remove();
+        this.draggedLink.select("path").transition().duration(duration).attr("d", this.dragPath(this.draggedLink.d)).remove();
       } else {
         this.draggedLink.attr("opacity", 1).transition().duration(fastDuration).attr("opacity", 0).remove();
       }
@@ -491,8 +500,8 @@
       let node = d3.select(domNode)
       if(node.select(".glow").size() == 0) {
         node.insert("text","text")
-        .attr('class', 'glow icon-text')
-        .attr('font-size', `${nodeIconSize + 5}px` ) // +5 for a stronger glow
+        .attr("class", "glow icon-text")
+        .attr("font-size", `${nodeIconSize + 5}px` ) // +5 for a stronger glow
         .style("filter", "url(#glow)")
         .text(d.data.icon)
         .attr("opacity", 0).transition().duration(fastDuration).attr("opacity", 1);
@@ -526,6 +535,7 @@
 <style lang="scss">
 .graph-scroll-container {
   height: 100%;
+  width: 100%;
 
   svg {
     overflow: visible;

@@ -1,11 +1,11 @@
-import Vue from 'vue'
-import Vuex from 'vuex'
-import { createPersistedState, createSharedMutations } from 'vuex-electron'
+import Vue from "vue"
+import Vuex from "vuex"
+import { createPersistedState, createSharedMutations } from "vuex-electron"
 
 Vue.use(Vuex)
 
-import counter from '@/../renderer/store/modules/Counter'
-import procedures from '@/../renderer/store/modules/Procedures'
+import counter from "@/../renderer/store/modules/Counter"
+import procedures from "@/../renderer/store/modules/Procedures"
 
 export default new Vuex.Store({
   modules: {
@@ -15,5 +15,5 @@ export default new Vuex.Store({
     createPersistedState(),
     createSharedMutations()
   ],
-  strict: process.env.NODE_ENV !== 'production'
+  strict: process.env.NODE_ENV !== "production"
 })

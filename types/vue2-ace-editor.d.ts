@@ -1,1 +1,1 @@
-declare module 'vue2-ace-editor';
+declare module "vue2-ace-editor";

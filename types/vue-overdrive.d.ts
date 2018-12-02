@@ -1,1 +1,1 @@
-declare module 'vue-overdrive';
+declare module "vue-overdrive";

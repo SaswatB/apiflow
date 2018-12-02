@@ -12,8 +12,8 @@
 </template>
 
 <script lang="ts">
-  import { Vue, Component, Prop } from 'vue-property-decorator'
-  import { remote } from 'electron'
+  import { Vue, Component, Prop } from "vue-property-decorator"
+  import { remote } from "electron"
   const BrowserWindow = remote.getCurrentWindow();
 
   @Component({})

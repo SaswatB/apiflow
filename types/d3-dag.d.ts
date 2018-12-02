@@ -1,1 +1,1 @@
-declare module 'd3-dag';
+declare module "d3-dag";

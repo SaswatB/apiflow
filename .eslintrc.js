@@ -1,8 +1,8 @@
 module.exports = {
   root: true,
   parserOptions: {
-    parser: 'typescript-eslint-parser',
-    sourceType: 'module',
+    parser: "typescript-eslint-parser",
+    sourceType: "module",
     ecmaFeatures: {
       legacyDecorators: true,
       jsx: true
@@ -20,17 +20,17 @@ module.exports = {
     __static: true
   },
   plugins: [
-    'vue'
+    "vue"
   ],
-  'rules': {
+  "rules": {
     // allow paren-less arrow functions
-    'arrow-parens': 0,
+    "arrow-parens": 0,
     // allow async-await
-    'generator-star-spacing': 0,
+    "generator-star-spacing": 0,
     // allow debugger during development
-    'no-debugger': process.env.NODE_ENV === 'production' ? 2 : 0,
+    "no-debugger": process.env.NODE_ENV === "production" ? 2 : 0,
     // TODO: remove
-    'no-console': 0,
+    "no-console": 0,
     // limit number of html attributes on each line
     "vue/max-attributes-per-line": [2, {
       "singleline": 4,
@@ -40,6 +40,6 @@ module.exports = {
       }
     }],
     // typescript automatically checks for unused vars
-    'no-unused-vars': 'off'
+    "no-unused-vars": "off"
   }
 }

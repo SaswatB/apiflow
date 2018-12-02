@@ -6,20 +6,20 @@
  */
 
 /* eslint-disable */
-import { app } from 'electron'
+import { app } from "electron"
 
 // Install `electron-debug` with `devtron`
-require('electron-debug')({ showDevTools: true })
+require("electron-debug")({ showDevTools: true })
 
 // Install `vue-devtools`
-app.on('ready', () => {
-  let installExtension = require('electron-devtools-installer')
+app.on("ready", () => {
+  let installExtension = require("electron-devtools-installer")
   installExtension.default(installExtension.VUEJS_DEVTOOLS)
     .then(() => {})
     .catch((err:any) => {
-      console.log('Unable to install `vue-devtools`: \n', err)
+      console.log("Unable to install `vue-devtools`: \n", err)
     })
 })
 
 // Require `main` process to boot app
-require('./index.ts')
+require("./index.ts")

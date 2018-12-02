@@ -6,8 +6,8 @@
 </template>
 
 <script lang="ts">
-  import { Vue, Component } from 'vue-property-decorator'
-  import TitleBar from './components/standalone/TitleBar.vue'
+  import { Vue, Component } from "vue-property-decorator"
+  import TitleBar from "@/components/standalone/TitleBar.vue"
 
   @Component({components: {TitleBar}})
   export default class Apiflow extends Vue {}

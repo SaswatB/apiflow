@@ -1,1 +1,1 @@
-declare module 'vue-split-panel';
+declare module "vue-split-panel";

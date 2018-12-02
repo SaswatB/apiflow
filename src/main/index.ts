@@ -1,18 +1,18 @@
-'use strict'
+"use strict"
 
-import { app, BrowserWindow } from 'electron'
-import '../renderer/store/index.ts'
+import { app, BrowserWindow } from "electron"
+import "@/../renderer/store/index.ts"
 
 /**
  * Set `__static` path to static files in production
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
  */
-if (process.env.NODE_ENV !== 'development') {
-  (global as any).__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\')
+if (process.env.NODE_ENV !== "development") {
+  (global as any).__static = require("path").join(__dirname, "/static").replace(/\\/g, "\\\\")
 }
 
 let mainWindow: BrowserWindow | null = null
-const winURL = process.env.NODE_ENV === 'development'
+const winURL = process.env.NODE_ENV === "development"
   ? `http://localhost:9080`
   : `file://${__dirname}/index.html`
 
@@ -23,6 +23,8 @@ function createWindow () {
   mainWindow = new BrowserWindow({
     height: 700,
     width: 1300,
+    minHeight: 600,
+    minWidth: 600,
     useContentSize: true,
     webPreferences: {
       experimentalFeatures: true,
@@ -31,27 +33,27 @@ function createWindow () {
     // Remove the window frame from windows applications
     // frame: false, // TODO: uncomment
     // Hide the titlebar from MacOS applications while keeping the stop lights
-    // titleBarStyle: 'hidden',
+    // titleBarStyle: "hidden",
   })
 
   // mainWindow.setWindowButtonVisibility(false)
 
   mainWindow.loadURL(winURL)
 
-  mainWindow.on('closed', () => {
+  mainWindow.on("closed", () => {
     mainWindow = null
   })
 }
 
-app.on('ready', createWindow)
+app.on("ready", createWindow)
 
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
+app.on("window-all-closed", () => {
+  if (process.platform !== "darwin") {
     app.quit()
   }
 })
 
-app.on('activate', () => {
+app.on("activate", () => {
   if (mainWindow === null) {
     createWindow()
   }
@@ -66,13 +68,13 @@ app.on('activate', () => {
  */
 
 /*
-import { autoUpdater } from 'electron-updater'
+import { autoUpdater } from "electron-updater"
 
-autoUpdater.on('update-downloaded', () => {
+autoUpdater.on("update-downloaded", () => {
   autoUpdater.quitAndInstall()
 })
 
-app.on('ready', () => {
-  if (process.env.NODE_ENV === 'production') autoUpdater.checkForUpdates()
+app.on("ready", () => {
+  if (process.env.NODE_ENV === "production") autoUpdater.checkForUpdates()
 })
  */

@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
-    "paths": { "*": ["types/*"], "@":["src/main", "src/renderer"] },
+    "paths": { "*": ["types/*"], "@/*":["src/main/*", "src/renderer/*"] },
     "outDir": "./build/",
     "sourceMap": true,
     "strict": true,

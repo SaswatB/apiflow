@@ -57,11 +57,11 @@
 </template>
 
 <script>
-  import { mapActions, mapState } from 'vuex'
-  import BlurredPopover from './standalone/BlurredPopover'
+  import { mapActions, mapState } from "vuex"
+  import BlurredPopover from "@/components/standalone/BlurredPopover"
 
   export default {
-    name: 'SideTreeBrowser',
+    name: "SideTreeBrowser",
     components: { BlurredPopover },
     props: {
       title: { type: String, required: true },
@@ -71,7 +71,7 @@
     },
     data() {
       return {
-        addItemName: '',
+        addItemName: "",
         renameDialogVisible: false,
         renameDialogNewName: "",
         renameDialogData: {}
@@ -95,14 +95,14 @@
       // if a procedure was recorded as open, reselect it
       for(let i in this.value) {
         if(this.value[i].id == this.openProcedure) {
-          this.$emit('item-selected', this.value[i].id)
+          this.$emit("item-selected", this.value[i].id)
           this.$refs.tree.setCurrentKey(this.value[i].id)
           break;
         }
       }
     },
     methods: {
-      ...mapActions(['setOpenProcedure']),
+      ...mapActions(["setOpenProcedure"]),
       allowDrag() {
         return true;
       },
@@ -114,7 +114,7 @@
         setTimeout(() => {this.$refs.addItemPopoverTextbox.focus()}, 150);
       },
       addItem() {
-        this.$emit('add-item', this.addItemName)
+        this.$emit("add-item", this.addItemName)
         this.$refs.addItemPopover.hide();
         // wait a bit before clearing so that the user doesn't see an empty text box
         setTimeout(() => {this.addItemName = ""}, 300);
@@ -136,10 +136,10 @@
       },
       confirmDeleteItem(data, node) {
         this.$refs["editItemPopover_"+data.id].hide();
-        this.$confirm("Are you sure want to delete " + this.itemName + " '" + data.label + "'?", '', {
-            confirmButtonText: 'OK',
-            cancelButtonText: 'Cancel',
-            type: 'warning'
+        this.$confirm("Are you sure want to delete " + this.itemName + " '" + data.label + "'?", "", {
+            confirmButtonText: "OK",
+            cancelButtonText: "Cancel",
+            type: "warning"
           })
           .then(() => {this.deleteItem(data, node)})
           .catch(() => {});
@@ -158,7 +158,7 @@
       itemSelected(id) {
         // when the user selects an item, save it and update the application's state
         if(id != this.openProcedure) {
-          this.$emit('item-selected', id)
+          this.$emit("item-selected", id)
           this.setOpenProcedure(id)
         }
       }

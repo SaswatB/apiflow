@@ -1,8 +1,8 @@
 <script>
-  import ramjet from 'ramjet'
+  import ramjet from "ramjet"
 
   export default {
-    name: 'MorphingCollapse',
+    name: "MorphingCollapse",
     components: {},
     props: { 
       collapseItemName: { type: String, required: true },
@@ -23,14 +23,14 @@
         const marginTop = parseInt(computedStyle.marginTop, 10);
         const marginLeft = parseInt(computedStyle.marginLeft, 10);
         return {
-          top: (rect.top - marginTop) + 'px',
-          left: (rect.left - marginLeft) + 'px',
-          width: rect.width + 'px',
-          height: rect.height + 'px',
+          top: (rect.top - marginTop) + "px",
+          left: (rect.left - marginLeft) + "px",
+          width: rect.width + "px",
+          height: rect.height + "px",
           margin: computedStyle.margin,
           padding: computedStyle.padding,
           borderRadius: computedStyle.borderRadius,
-          position: 'absolute'
+          position: "absolute"
         };
       },
       beforeEnter(element) {
@@ -75,8 +75,8 @@
         let clone = from.element.cloneNode(true);
         const parentPosition = content.getBoundingClientRect();
         const fromPosition = this.getPosition(from.element);
-        fromPosition.top = (fromPosition.top.replace('px', '') - parentPosition.top) + "px";
-        fromPosition.left = (fromPosition.left.replace('px', '') - parentPosition.left) + "px";
+        fromPosition.top = (fromPosition.top.replace("px", "") - parentPosition.top) + "px";
+        fromPosition.left = (fromPosition.left.replace("px", "") - parentPosition.left) + "px";
         Object.assign(clone.style, fromPosition);
         fromParent.appendChild(clone);
         //have vue remove the original element
@@ -86,7 +86,7 @@
         //show the entering element
         to.element.style.display = "";
         //animate the collapse content container
-        content.style.height = (content.style.height.replace('px', '') - fromPosition.height.replace('px', '') + to.element.getBoundingClientRect().height) + "px";
+        content.style.height = (content.style.height.replace("px", "") - fromPosition.height.replace("px", "") + to.element.getBoundingClientRect().height) + "px";
         //transform from our clone to the entering element
         ramjet.transform(clone, to.element, { duration: 150, done(){
           to.done();

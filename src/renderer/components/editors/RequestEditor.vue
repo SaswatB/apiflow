@@ -68,8 +68,7 @@
                     lang="javascript"
                     theme="merbivore_soft"
                     width="100%"
-                    height="300"
-                    @init="editorInit" />
+                    height="300"/>
                 </div>
               </template>
             </MorphingCollapse>
@@ -84,32 +83,31 @@
           lang="javascript"
           theme="merbivore_soft"
           width="100%"
-          height="100%"
-          @init="editorInit" />
+          height="100%"/>
       </SplitArea>
     </Split>
   </div>
 </template>
 
 <script lang="ts">
-  import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
-  import { getModule } from 'vuex-module-decorators'
-  import AceEditor from 'vue2-ace-editor'
-  const difference = require('lodash/difference')
-  const beautify = require('js-beautify').js
+  import { Vue, Component, Prop, Watch } from "vue-property-decorator"
+  import { getModule } from "vuex-module-decorators"
+  import AceEditor from "vue2-ace-editor"
+  const difference = require("lodash/difference")
+  const beautify = require("js-beautify").js
 
-  const ace = require('brace');
-  require('brace/ext/language_tools')
-  require('brace/mode/javascript')
-  require('brace/theme/merbivore_soft')
-  require('brace/snippets/javascript')
+  const ace = require("brace");
+  import "brace/ext/language_tools"
+  import "brace/mode/javascript"
+  import "brace/theme/merbivore_soft"
+  import "brace/snippets/javascript"
 
-  import {  newLinkedValueId } from '../../model/Procedure'
-  import { RequestMethod, RequestAuthenticationType, RequestPayloadType, getPayloadTypes, Request } from '../../model/Request'
-  import Procedures from '../../store/modules/Procedures'
+  import {  newLinkedValueId } from "@/model/Procedure"
+  import { RequestMethod, RequestAuthenticationType, RequestPayloadType, getPayloadTypes, Request } from "@/model/Request"
+  import Procedures from "@/store/modules/Procedures"
 
-  import StoredLinkedInput from '../StoredLinkedInput.vue' // TODO: fix references
-  import MorphingCollapse from '../standalone/MorphingCollapse.vue'
+  import StoredLinkedInput from "@/components/StoredLinkedInput.vue"
+  import MorphingCollapse from "@/components/standalone/MorphingCollapse.vue"
 
   @Component({ components: { AceEditor, StoredLinkedInput, MorphingCollapse } })
   export default class RequestEditor extends Vue {
@@ -122,8 +120,8 @@
     payloadFormName = "Payload"
     jsonPayloadEditorOptions = {
       tabSize: 4,
-      mode: 'text/javascript',
-      theme: 'base16-dark',
+      mode: "text/javascript",
+      theme: "base16-dark",
       lineNumbers: true,
       line: true,
       placeholder: "JSON Body"
@@ -150,7 +148,7 @@
     }
 
 
-    @Watch('method')
+    @Watch("method")
     resetPayloadType() { 
         // reset payload type if its not supported for the set method
         if(this.method !== RequestMethod.Post) {
@@ -158,7 +156,7 @@
         }
     }
 
-    @Watch('activeForms')
+    @Watch("activeForms")
     handleFormOpenClose(newVal:Array<string>, oldVal:Array<string>) {
       let diff = difference(newVal, oldVal);
       if(diff.length == 1) {
@@ -167,9 +165,6 @@
           (this.$refs.jsonPayloadEditor as any).editor.focus();
         }
       }
-    }
-
-    editorInit() {
     }
 
     addHeader() {

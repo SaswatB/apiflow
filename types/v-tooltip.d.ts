@@ -1,1 +1,1 @@
-declare module 'v-tooltip';
+declare module "v-tooltip";

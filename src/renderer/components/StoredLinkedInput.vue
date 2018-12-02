@@ -3,14 +3,14 @@
 </template>
 
 <script lang="ts">
-  import { Component, Prop, Watch } from 'vue-property-decorator'
-  import { getModule } from 'vuex-module-decorators'
-  const clonedeep = require('lodash.clonedeep')
+  import { Component, Prop, Watch } from "vue-property-decorator"
+  import { getModule } from "vuex-module-decorators"
+  const clonedeep = require("lodash.clonedeep")
 
-  import { ProcedureLinkedValue } from '../model/Procedure'
-  import Procedures from '../store/modules/Procedures' // TODO: fix reference to use @
+  import { ProcedureLinkedValue } from "@/model/Procedure"
+  import Procedures from "@/store/modules/Procedures"
 
-  import LinkedInput from './standalone/LinkedInput.vue' // TODO: fix references
+  import LinkedInput from "@/components/standalone/LinkedInput.vue"
 
   @Component({})
   export default class RequestEditor extends LinkedInput {

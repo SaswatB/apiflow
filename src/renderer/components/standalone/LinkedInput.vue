@@ -15,8 +15,8 @@
 </template>
 
 <script lang="ts">
-  import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
-  import { ProcedureLinkedValue } from '../../model/Procedure'
+  import { Vue, Component, Prop, Watch } from "vue-property-decorator"
+  import { ProcedureLinkedValue } from "@/model/Procedure"
 
   @Component({})
   export default class LinkedInput extends Vue {
@@ -28,12 +28,12 @@
 
     updateValueText(newText: string) {
       this.value.value = newText;
-      this.$emit('input', this.value);
+      this.$emit("input", this.value);
     }
 
     updateValuelinked(linked: boolean) {
       this.value.linked = linked;
-      this.$emit('input', this.value);
+      this.$emit("input", this.value);
     }
   }
 </script>

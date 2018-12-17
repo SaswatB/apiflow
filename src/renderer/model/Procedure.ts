@@ -8,6 +8,7 @@ export interface Procedure {
 
 export interface ProcedureLinkedValue {
   id: string,
+  name: string,
   value: string,
   linked: boolean
 }

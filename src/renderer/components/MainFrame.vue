@@ -33,8 +33,17 @@
       <!-- Editor -->
       <SplitArea :size="75">
         <div class="content">
-          <FlowEditor v-if="editorType == 'flow'" v-model="flowEdit"/>
-          <RequestEditor v-if="editorType == 'request'" v-model="requestEdit"/>
+          <transition name="fade">
+            <FlowEditor
+              v-if="editorType == 'flow'"
+              ref="flowEditor"
+              v-model="flowEdit"
+              :ctx="flowCtx"
+              class="editor"/>
+          </transition>
+          <transition name="fade">
+            <RequestEditor v-if="editorType == 'request'" ref="requestEditor" v-model="requestEdit" class="editor"/>
+          </transition>
         </div>
       </SplitArea>
     </Split>
@@ -45,33 +54,17 @@
   import { Vue, Component, Watch } from "vue-property-decorator"
   import { getModule } from "vuex-module-decorators"
   import { v4 as uuidv4 } from "uuid";
-  const clonedeep = require("lodash.clonedeep")
 
-  import { Procedure, ProcedureMap, ProcedureFolderItemType, ProcedureRootFolderName, ProcedureFolderMap } from "../model/Procedure"
+  import { Procedure, ProcedureRootFolderName } from "@/model/Procedure"
   import { Flow } from "@/model/Flow"
   import { Request } from "@/model/Request"
   import Procedures from "@/store/modules/Procedures" // TODO: fix reference to use @
   import Counter from "@/store/modules/Counter"
+  import { mapToTree } from "@/utils/utils"
 
-  import SideTreeBrowser from "./SideTreeBrowser.vue"
-  import RequestEditor from "./editors/RequestEditor.vue"
-  import FlowEditor from "./editors/FlowEditor.vue"
-
-  function mapToTree(map: ProcedureMap, folders:ProcedureFolderMap, folderName:string = ProcedureRootFolderName): Array<object> {
-    const arr = [];
-    for(let i in folders[folderName]) {
-      const id = folders[folderName][i].id;
-      switch(folders[folderName][i].type) {
-        case ProcedureFolderItemType.Procedure:
-          arr.push({ label: map[id].name, id });
-          break;
-        case ProcedureFolderItemType.Folder:
-          arr.push({ label: id, id, children: mapToTree(map, folders, id) });
-          break;
-      }
-    }
-    return arr;
-  }
+  import SideTreeBrowser from "@/components/SideTreeBrowser.vue"
+  import RequestEditor from "@/components/editors/RequestEditor.vue"
+  import FlowEditor from "@/components/editors/FlowEditor.vue"
 
   @Component({ components: { SideTreeBrowser, RequestEditor, FlowEditor } })
   export default class MainFrame extends Vue {
@@ -86,6 +79,7 @@
     requestTree: Array<object> = []
     editorType = ""
     flowEdit:Flow = Flow.placeholder()
+    flowCtx = {flows: this.ProceduresStore.flows, requests: this.ProceduresStore.requests, linkedValues: this.ProceduresStore.linkedValues}
     requestEdit:Request = Request.placeholder()
 
     created() {
@@ -106,18 +100,17 @@
       this.requestTree = mapToTree(this.ProceduresStore.requests, this.ProceduresStore.requestFolders);
     }
     @Watch("flowEdit", {deep: true})
-    saveFlowEdit() { 
+    handleFlowEditChanged() {
       this.ProceduresStore.saveFlow(this.flowEdit);
     }
     @Watch("requestEdit", {deep: true})
-    saveRequestEdit() {
-      console.log("e", this.requestEdit)
+    handleRequestEditChanged() {
       this.ProceduresStore.saveRequest(this.requestEdit);
     }
 
     addFlow(name: string) {
       let id = "Flow_"+uuidv4();
-      this.ProceduresStore.saveFlow(Flow.newFlow(name, id));
+      this.ProceduresStore.saveFlow(Flow.newFlow(id, name));
       this.ProceduresStore.addFlowToFolder({flowId: id, folderName: ProcedureRootFolderName});
 
       // TODO: fix and replace with nextTick
@@ -134,11 +127,13 @@
       setTimeout(() => { (this.$refs.requestTreeBrowser as any).selectItem(id); }, 150);
     }
     flowSelected(id: string) {
-      this.flowEdit = clonedeep(this.ProceduresStore.flows[id]);
+      if(this.$refs.flowEditor) (this.$refs.flowEditor as any).clearSelection();
+      this.flowEdit = Flow.getFromStore(this.ProceduresStore.flows, id);
       this.editorType = "flow";
     }
     requestSelected(id: string) {
-      this.requestEdit = Request.migrate(clonedeep(this.ProceduresStore.requests[id]));
+      if(this.$refs.requestEditor) (this.$refs.requestEditor as any).prepareTransition();
+      this.requestEdit = Request.getFromStore(this.ProceduresStore.requests, id);
       this.editorType = "request";
     }
   }
@@ -146,7 +141,7 @@
 
 <style lang="scss">
   .frame {
-    height: calc(100% - 30px);
+    height: 100%; //calc(100% - 30px); // TODO: uncomment when custom titlebar is enabled
 
     .sidebar {
       background-color: rgba(0, 0, 0, .2);
@@ -168,11 +163,26 @@
 
     .content {
       height: 100%;
+      overflow: hidden;
+      position: relative;
+      .editor {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+      }
     }
 
     .gutter {
       background-image: unset;
       background-color: unset;
     }
+  }
+  .fade-enter-active, .fade-leave-active {
+    transition: opacity .3s;
+  }
+  .fade-enter, .fade-leave-to {
+    opacity: 0;
   }
 </style>

@@ -4,9 +4,9 @@
     :width="width"
     :height="height"
     :popper-options="{data: {offsets: {popper: { height: height } } } }"
-    placement="right"
+    :placement="placement"
     popper-class="blurred-popover">
-    <div class="popover-body" @keydown.esc="hide()">
+    <div :class="popoverBodyClass" class="popover-body" @keydown.esc="hide()">
       <h3>{{ title }}</h3>
       <slot/>
     </div>
@@ -23,6 +23,8 @@
     @Prop(String) title!: string
     @Prop(Number) width!: number
     @Prop(Number) height!: number
+    @Prop({type: String, default: "right"}) placement!: string
+    @Prop(String) popoverBodyClass!: string
 
     popoverVisible = false
 
@@ -43,12 +45,24 @@
 
     .popper__arrow {
       border: unset !important;
-      left: -7px !important;
+    }
 
-      &::after {
+    &[x-placement^="top"] .popper__arrow::after  {
+      bottom: 0 !important;
+      border-top-color: rgba(0, 0, 0, .25) !important;
+    }
+    &[x-placement^="right"] .popper__arrow {
+      left: -7px !important;
+      &::after  {
         border-right-color: rgba(0, 0, 0, .25) !important;
       }
     }
+    // &[x-placement^="bottom"] .popper__arrow::after  {
+    //   border-bottom-color: rgba(0, 0, 0, .25) !important;
+    // }
+    // &[x-placement^="left"] .popper__arrow::after  {
+    //   border-left-color: rgba(0, 0, 0, .25) !important;
+    // }
 
     .popover-body {
       position: absolute;
@@ -58,7 +72,7 @@
       right: 0;
       padding: 15px;
       backdrop-filter: blur(3px);
-      background-color: rgba(0,0,0,.25);
+      background-color: #000a1277;
       color: white;
     }
   }

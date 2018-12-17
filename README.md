@@ -1,28 +1,28 @@
-# apiflow
+# ApiFlow
 
-> An extensible api testing tool.
+> A powerful API testing tool.
 
-#### Build Setup
+## Development
+
+<details>
+<summary>Getting Started</summary>
 
 ``` bash
 # install dependencies
-npm install
+yarn install
 
-# serve with hot reload at localhost:9080
-npm run dev
+# serve with hot reload
+yarn run dev
 
 # build electron application for production
-npm run build
+yarn run build
 
 # run unit & end-to-end tests
-npm test
-
+yarn test
 
 # lint all JS/Vue component files in `src/`
-npm run lint
+yarn run lint
 
 ```
 
----
-
-This project was generated with [electron-vue](https://github.com/SimulatedGREG/electron-vue)@[8fae476](https://github.com/SimulatedGREG/electron-vue/tree/8fae4763e9d225d3691b627e83b9e09b56f6c935) using [vue-cli](https://github.com/vuejs/vue-cli). Documentation about the original structure can be found [here](https://simulatedgreg.gitbooks.io/electron-vue/content/index.html).
+</details>

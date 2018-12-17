@@ -14,13 +14,10 @@ $--collapse-border-color: #ffffff61;
   @include e(header) {
     padding: 20px;
     transition: border-bottom-color .3s, background-color 150ms linear;
+    font-size: 15px;
     &:hover {
       background-color: $--collapse-header-hover-fill;
     }
-  }
-
-  @include e(wrap) {
-    // border-bottom: unset;
   }
 
   @include e(content) {

@@ -1,14 +1,19 @@
-import { Procedure } from "./Procedure"
+import { Procedure, ProcedureLinkedValue, ProcedureMap } from "./Procedure"
+const clonedeep = require("lodash.clonedeep")
+import { Request } from "./Request"
 
 export enum FlowNodeType {
   Root = "Root",
   Play = "Play",
   Request = "Request",
-  WSConnect = "Websocket Connect",
+  WSConnect = "Websocket Connector",
   Aggregate = "Aggregate",
   Split = "Split",
   Sleep = "Sleep"
 }
+
+export const FlowRootNodeId = "root";
+export const FlowPlayNodeId = "play";
 
 export function getFlowNodeTypeIcon(type: FlowNodeType) {
   if(type == FlowNodeType.Root) return "\uF830"; //shape
@@ -25,10 +30,41 @@ export interface FlowNode {
   id: string,
   type: FlowNodeType,
   parentIds: Array<string>
+}
 
-  // get icon() : string {
-  //   return getFlowNodeTypeIcon(this.type);
-  // } 
+export interface FlowDagNode { // compatible with d3's dag node
+  id: string,
+  data: FlowNode,
+  children: Array<FlowDagNode>,
+  x: number,
+  y: number,
+  layer: number
+}
+
+export interface FlowNodeSettings {
+  name?: string
+  disabled?: boolean
+  triggerAction?: string
+  linkPolicy?: string
+}
+
+export interface FlowNodeRequestSettings extends FlowNodeSettings {
+  requestId?: string
+  linkedValueData?: {[index: string]: string}
+}
+
+export interface FlowNodeWSConnectSettings extends FlowNodeSettings {
+  wsconnectUrl?: string
+}
+
+export interface FlowNodeSleepSettings extends FlowNodeSettings {
+  sleep?: number
+}
+
+export interface FlowContext {
+  flows: ProcedureMap<Flow>,
+  requests:  ProcedureMap<Request>,
+  linkedValues:  {[index: string]: ProcedureLinkedValue}
 }
 
 export class Flow implements Procedure {
@@ -36,10 +72,10 @@ export class Flow implements Procedure {
   id: string
   name: string
   flowData: Array<FlowNode> = [ // two default nodes that need to be in every dag
-    { "id": "root", "type": FlowNodeType.Root, "parentIds": [] },
-    { "id": "play", "type": FlowNodeType.Play, "parentIds": ["root"]}
+    { "id": FlowRootNodeId, "type": FlowNodeType.Root, "parentIds": [] },
+    { "id": FlowPlayNodeId, "type": FlowNodeType.Play, "parentIds": [FlowRootNodeId]}
   ];
-  flowSettings: {[index: string]: {}} = {}
+  flowSettings: {[index: string]: FlowNodeSettings} = {}
 
   private constructor(id:string, name: string) {
     this.id = id
@@ -52,6 +88,10 @@ export class Flow implements Procedure {
 
   static placeholder() {
     return new Flow("","");
+  }
+
+  static getFromStore(flowMap: ProcedureMap<Flow>, id: string) {
+    return Flow.migrate(clonedeep(flowMap[id]));
   }
 
   static migrate(obj: any) {

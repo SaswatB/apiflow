@@ -19,6 +19,7 @@ Vue.config.productionTip = false
 Vue.use(Element, {locale: require("element-ui/lib/locale/lang/en")})
 Vue.use(Overdrive)
 Vue.use(VueContext)
+Vue.use(require("vue-moment"));
 Vue.use(vuescroll)
 Vue.use(VueSplit)
 Vue.use(VTooltip)

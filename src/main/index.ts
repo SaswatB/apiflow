@@ -30,11 +30,12 @@ function createWindow () {
       experimentalFeatures: true,
       webSecurity: false // TODO: disable
     }
-    // Remove the window frame from windows applications
-    // frame: false, // TODO: uncomment
-    // Hide the titlebar from MacOS applications while keeping the stop lights
-    // titleBarStyle: "hidden",
+    // Remove the window frame
+    // frame: false, // TODO: uncomment when custom titlebar is enabled, waiting on https://github.com/electron/electron/issues/14787
   })
+
+  //remove the default menu
+  mainWindow.setMenu(null)
 
   // mainWindow.setWindowButtonVisibility(false)
 

@@ -1,4 +1,5 @@
-import { Procedure, newLinkedValueId } from "./Procedure"
+import { Procedure, newLinkedValueId, ProcedureMap } from "./Procedure"
+const clonedeep = require("lodash.clonedeep")
 import axios from "axios"
 
 export enum RequestMethod {
@@ -55,41 +56,50 @@ export class Request implements Procedure {
     return new Request("","","","","");
   }
 
+  static getFromStore(requestMap: ProcedureMap<Request>, id: string) {
+    return Request.migrate(clonedeep(requestMap[id]));
+  }
+
   static migrate(obj: any) {
     const req = Request.placeholder();
     Object.assign(req, obj); //TODO: proper migrations
     return req;
   }
 
-
-  sendRequest(linkedValues: {[index: string]: string}) {
+  sendRequest(linkedValueData: {[index: string]: string}) {
+    if(this.method === undefined) {
+      return Promise.reject("Method not provided");
+    }
+    if(this.url === undefined) {
+      return Promise.reject("URL not provided");
+    }
     let args:any = { method: this.method, url: this.url, headers: {} }
     if(this.payloadType === RequestPayloadType.JSON) {
-      args.data = JSON.parse(this.jsonPayload)
+      try {
+        args.data = JSON.parse(this.jsonPayload)
+      } catch(err) {
+        return Promise.reject("Invalid JSON Payload (" + (err.message || "Unknown Error") + ")");
+      }
     }
-    for(let i in this.headers){
-      const nameLink = linkedValues[this.headers[i].name]
-      const valueLink = linkedValues[this.headers[i].value]
+    for(let header of this.headers) {
+      const nameLink = linkedValueData[header.name]
+      const valueLink = linkedValueData[header.value]
       if(nameLink !== undefined && valueLink !== undefined) {
         args.headers[nameLink] = valueLink
       }
     }
     if(this.authType === RequestAuthenticationType.Basic) {
-      const usernameLink = linkedValues[this.authSimpleUsername]
-      const passwordLink = linkedValues[this.authSimplePassword]
+      const usernameLink = linkedValueData[this.authSimpleUsername]
+      const passwordLink = linkedValueData[this.authSimplePassword]
       if(usernameLink !== undefined && passwordLink !== undefined) {
         args.headers["Authorization"] = "Basic " + btoa(usernameLink + ":" + passwordLink);
       }
     } else if(this.authType === RequestAuthenticationType.Bearer) {
-      const tokenLink = linkedValues[this.authToken]
+      const tokenLink = linkedValueData[this.authToken]
       if(tokenLink !== undefined) {
         args.headers["Authorization"] = "Bearer " + tokenLink;
       }
     }
-    axios(args).then((response) => {
-      this.response = response
-    }).catch((error) => {
-      this.response = error
-    });
+    return axios(args);
   }
 }

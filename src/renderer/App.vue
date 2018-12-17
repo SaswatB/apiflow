@@ -1,6 +1,7 @@
 <template>
   <div id="app">
-    <TitleBar title="ApiFlow"/>
+    <!-- TODO: uncomment when custom titlebar is enabled -->
+    <!-- <TitleBar title="ApiFlow"/> -->
     <router-view/>
   </div>
 </template>

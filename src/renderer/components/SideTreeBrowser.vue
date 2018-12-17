@@ -93,10 +93,10 @@
     },
     mounted() {
       // if a procedure was recorded as open, reselect it
-      for(let i in this.value) {
-        if(this.value[i].id == this.openProcedure) {
-          this.$emit("item-selected", this.value[i].id)
-          this.$refs.tree.setCurrentKey(this.value[i].id)
+      for(let procedure of this.value) {
+        if(procedure.id == this.openProcedure) {
+          this.$emit("item-selected", procedure.id)
+          this.$refs.tree.setCurrentKey(procedure.id)
           break;
         }
       }
@@ -178,6 +178,7 @@
     }
     .el-tree-node__content {
       transition: background-color 150ms linear;
+      height: unset;
 
       &:hover {
         background-color: rgba(0, 0, 0, .2);
@@ -191,6 +192,8 @@
     .tree-node {
       display: flex;
       width: 100%;
+      padding: 3px 0;
+      font-size: 14px;
 
       .spacer {
         flex-grow: 1;
@@ -205,8 +208,6 @@
     }
 
     button {
-      color: white;
-      border: unset;
       padding: 8px;
       margin-right: 10px;
     }

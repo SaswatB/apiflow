@@ -1,0 +1,8 @@
+$--color-text-primary: unset;
+@import "element-ui/packages/theme-chalk/src/tabs.scss";
+
+@include b(tabs) {
+  @include e(item) {
+    transition: color 150ms linear;
+  }
+}

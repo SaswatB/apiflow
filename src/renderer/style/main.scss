@@ -1,5 +1,6 @@
 @import '~@mdi/font/css/materialdesignicons.css';
 @import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro');
+@import url('https://fonts.googleapis.com/css?family=Source+Code+Pro');
 @import "./element-ui/index.scss";
 @import "./tooltip.scss";
 
@@ -12,6 +13,10 @@
 body {
     font-family: 'Source Sans Pro', sans-serif;
     color: white;
+}
+
+.code {
+    font-family: 'Source Code Pro', monospace;
 }
 
 .CodeMirror.CodeMirror-empty {
@@ -36,12 +41,20 @@ body {
     color: rgb(160, 160, 160)
 }
 
+.el-button {
+    border: unset;
+}
+
 .el-button-group.block {
     width: 100%;
     display: flex;
     .el-button {
         flex-grow: 1;
     }
+}
+
+.remove-btn:hover {
+    color: red;
 }
 
 //TODO: properly style dialogs

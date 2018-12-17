@@ -27,24 +27,24 @@
                 <div v-if="authenticationTypeIsSimple">
                   <el-form @submit.native.prevent="">
                     <el-form-item>
-                      <StoredLinkedInput :link-id="value.authSimpleUsername" field-name="Username" required/>
+                      <StoredLinkedInput :link-id="value.authSimpleUsername" link-name="Auth Username" field-name="Username" required/>
                     </el-form-item>
                     <el-form-item>
-                      <StoredLinkedInput :link-id="value.authSimplePassword" field-name="Password" required/>
+                      <StoredLinkedInput :link-id="value.authSimplePassword" link-name="Auth Password" field-name="Password" required/>
                     </el-form-item>
                   </el-form>
                 </div>
               </template>
               <template slot="subSlot3">
-                <div v-if="authenticationTypeIsToken"><StoredLinkedInput :link-id="value.authToken" field-name="Token" required/></div>
+                <div v-if="authenticationTypeIsToken"><StoredLinkedInput :link-id="value.authToken" link-name="Auth Token" field-name="Token" required/></div>
               </template>
             </MorphingCollapse>
             <!-- Headers Form -->
             <el-collapse-item :name="headersFormName" :title="headersFormName" class="header-form">
               <div v-for="header in value.headers" :key="header.key" class="header-form-row">
                 <el-form :inline="true" @submit.prevent="">
-                  <StoredLinkedInput :link-id="header.name" field-name="Name" required/>
-                  <StoredLinkedInput :link-id="header.value" field-name="Value" required/>
+                  <StoredLinkedInput :link-id="header.name" :link-name="'Header ' + header.key + ' Name'" field-name="Name" required/>
+                  <StoredLinkedInput :link-id="header.value" :link-name="'Header ' + header.key + ' Value'" field-name="Value" required/>
                   <el-button class="remove-btn" @click="removeHeader(header.key)"><i class="mdi mdi-minus"/></el-button>
                 </el-form>
               </div>
@@ -93,6 +93,8 @@
   import { Vue, Component, Prop, Watch } from "vue-property-decorator"
   import { getModule } from "vuex-module-decorators"
   import AceEditor from "vue2-ace-editor"
+  import isURL from "validator/lib/isURL"
+  import isJSON from "validator/lib/isJSON"
   const difference = require("lodash/difference")
   const beautify = require("js-beautify").js
 
@@ -126,6 +128,8 @@
       line: true,
       placeholder: "JSON Body"
     }
+    transitionClone?: Node
+    zIndex = 10000
     
     get method() { return this.value.method }
     get methodOptions() { return Object.keys(RequestMethod).map(k => RequestMethod[k as any]); }
@@ -149,11 +153,11 @@
 
 
     @Watch("method")
-    resetPayloadType() { 
-        // reset payload type if its not supported for the set method
-        if(this.method !== RequestMethod.Post) {
-          this.value.payloadType = RequestPayloadType.None;
-        }
+    handleMethodChanged() { 
+      // reset payload type if its not supported for the set method
+      if(this.method !== RequestMethod.Post) {
+        this.value.payloadType = RequestPayloadType.None;
+      }
     }
 
     @Watch("activeForms")
@@ -167,6 +171,19 @@
       }
     }
 
+    @Watch("value")
+    async handleValueChanged() {
+      if(this.transitionClone == undefined) return;
+      let element = (this.transitionClone as HTMLElement);
+      this.transitionClone = undefined;
+      //push away the clone
+      element.style.animation = "push-right 500ms 1 forwards cubic-bezier(.5,0,1,.5)";
+      //remove the clone after the animation
+      setTimeout(() => {
+        this.$el.parentElement!.removeChild(element);
+      }, 750);
+    }
+
     addHeader() {
       this.value.headers.push({
         key: this.value.headers.length != 0 ? this.value.headers[this.value.headers.length-1].key+1 : 0,
@@ -175,7 +192,7 @@
       })
     }
     removeHeader(headerKey: number) {
-      for(let i in this.value.headers){
+      for(let i = 0; i < this.value.headers.length; i++) {
         if(this.value.headers[i].key==headerKey){
             this.ProceduresStore.deleteLink(this.value.headers[i].name)
             this.ProceduresStore.deleteLink(this.value.headers[i].value)
@@ -195,7 +212,7 @@
 
     constructLinkedValuesMap(linkedValueIds: Array<string>) {
       let linkedValues:{[index:string]:string} = {};
-      for(let i in linkedValueIds) {
+      for(let i = 0; i < linkedValueIds.length; i++) {
         const link = this.ProceduresStore.linkedValues[linkedValueIds[i]]
         if(link !== undefined) {
           linkedValues[linkedValueIds[i]] = link.value;
@@ -205,10 +222,20 @@
     }
 
     sendRequest() {
-      // TODO: validate arguments
-      let linkedValueIds = [];
+      //validate arguments
+      // TODO: validate more arguments
+      if(!isURL(this.value.url || "", {protocols: ["http", "https"], require_tld: false})) {
+        this.$notify.error({title: "Invalid URL", message: ""});
+        return;
+      }
+      if(this.payloadTypeIsJSON && !isJSON(this.value.jsonPayload)) {
+        this.$notify.error({title: "Invalid JSON Payload", message: ""});
+        return;
+      }
 
-      for(let i in this.value.headers) {
+      // get all the linked values used in the request
+      let linkedValueIds = [];
+      for(let i = 0; i < this.value.headers.length; i++) {
         linkedValueIds.push(this.value.headers[i].name);
         linkedValueIds.push(this.value.headers[i].value);
       }
@@ -216,7 +243,29 @@
       linkedValueIds.push(this.value.authSimplePassword);
       linkedValueIds.push(this.value.authToken);
 
-      this.value.sendRequest(this.constructLinkedValuesMap(linkedValueIds));
+      // send the request, with the resolved linked values
+      this.value.sendRequest(this.constructLinkedValuesMap(linkedValueIds)).then((response) => {
+        this.value.response = response
+      }).catch((error) => {
+        this.value.response = error
+      });
+    }
+
+    /**
+     * Prepare to perform a transition due to a model change
+     * It's expected that this.value is will be set immdiately 
+     * after this call, which will finish the transition
+     */
+    prepareTransition() {
+      //clone ourself
+      let fromParent = this.$el.parentElement;
+      this.transitionClone = this.$el.cloneNode(true);
+      const position = this.$el.getBoundingClientRect();
+      fromParent!.appendChild(this.transitionClone!);
+      //set an explict width to allow the margin-left animation to work properly
+      (this.transitionClone as HTMLElement).style.width = position.width + "px";
+      //use incrementally lower z-index so that new clones appear under older ones
+      (this.transitionClone as HTMLElement).style.zIndex = (this.zIndex--)+"";
     }
   }
 </script>
@@ -251,9 +300,6 @@
         input {
           padding-right: 0;
         }
-        button {
-          border: unset;
-        }
         .el-input-group__append {
           padding: 0 12px;
           button {
@@ -281,9 +327,6 @@
       }
       .remove-btn {
         padding: 7px;
-        &:hover {
-          color: red;
-        }
       }
     }
 
@@ -317,5 +360,11 @@
         }
       }
     }
+  }
+
+  @keyframes push-right {
+    0% { margin-left: 0; background-color: transparent; }
+    40% { background-color: rgba(0,0,0,.2); }
+    100% { margin-left: 100vw; }
   }
 </style>

@@ -46,11 +46,11 @@ export interface FlowNodeSettings {
   disabled?: boolean
   triggerAction?: string
   linkPolicy?: string
+  linkedValueData: {[index: string]: string}
 }
 
 export interface FlowNodeRequestSettings extends FlowNodeSettings {
   requestId?: string
-  linkedValueData?: {[index: string]: string}
 }
 
 export interface FlowNodeWSConnectSettings extends FlowNodeSettings {

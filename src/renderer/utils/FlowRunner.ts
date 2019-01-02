@@ -3,6 +3,7 @@ import * as d3dag from "d3-dag"
 
 import { FlowNodeType, FlowPlayNodeId, FlowDagNode, FlowNodeRequestSettings, FlowContext, Flow } from "@/model/Flow"
 import { Request } from "@/model/Request"
+import Vue from "vue";
 
 export enum FlowRunnerLogLevel {
   VERBOSE, INFORMATION, WARNING, ERROR
@@ -124,18 +125,12 @@ export class FlowRunner {
       case FlowNodeType.Request:
         execPromise = this.runRequestNode(node).then((data) => {
           this.addLog(FlowRunnerLogLevel.INFORMATION, "Got results for " + nodeNamePrint(node.data.type, nodeSettings.name), node.id, FlowRunnerLogEntryTargetPane.ResultViewer);
-          // save the result when we get it
-          if(this.results[node.id] === undefined) {
-            this.results[node.id] = []
-          }
-          this.results[node.id].push(data)
+          // save the result data
+          this.addNodeResult(node.id, data)
         }).catch((err) => {
           if(typeof err === "object") {
-            // save the result when we get it
-            if(this.results[node.id] === undefined) {
-              this.results[node.id] = []
-            }
-            this.results[node.id].push(err)
+            // save the error as the result
+            this.addNodeResult(node.id, err)
           }
           return Promise.reject(err);
         });
@@ -162,10 +157,17 @@ export class FlowRunner {
     let nodeSettings = this.flow.flowSettings[node.id] || {};
     let request = Request.getFromStore(this.ctx.requests, (nodeSettings as FlowNodeRequestSettings).requestId!);
 
-    return request.sendRequest((nodeSettings as FlowNodeRequestSettings).linkedValueData || {});
+    return request.sendRequest(nodeSettings.linkedValueData || {});
   }
 
   addLog(level: FlowRunnerLogLevel, entry: string, nodeId?: string, targetPane?: FlowRunnerLogEntryTargetPane) {
     this.log.push({time: Date.now(), level, entry, nodeId, targetPane});
+  }
+
+  addNodeResult(nodeId: string, result: any) {
+    if(this.results[nodeId] === undefined) {
+      Vue.set(this.results, nodeId, []); // required by Vue for proper reactive changes
+    }
+    this.results[nodeId].push(result)
   }
 }

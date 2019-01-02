@@ -6,6 +6,8 @@ $--input-disabled-fill: unset;
 $--input-disabled-color: $--text-color;
 // $--border-base: unset;
 $--input-border-radius: unset;
+$--button-hover-fill: $--color-hover;
+$--button-disabled-fill: $--disabled-fill;
 @import "element-ui/packages/theme-chalk/src/input.scss";
 
 @include b(input) {
@@ -25,6 +27,13 @@ $--input-border-radius: unset;
         div.el-select .el-input__inner,
         div.el-select:hover .el-input__inner {
             color: $--input-color;
+        }
+        .el-button:hover {
+            background-color: $--button-hover-fill;
+
+            @include when(disabled) {
+                background-color: $--button-disabled-fill;
+            }
         }
     }
 }

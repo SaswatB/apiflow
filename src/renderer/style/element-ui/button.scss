@@ -1,11 +1,12 @@
 $--button-default-color: $--text-color;
 $--button-default-fill: unset;//rgba(0, 0, 0, .1);
 $--button-hover-fill: $--color-hover;
+$--button-disabled-fill: $--disabled-fill;
 @import "element-ui/packages/theme-chalk/src/button.scss";
 
 @include b(button)  {
     border-radius: 4px;
-    border-color: #ffffff61;
+    border-color: rgba(255, 255, 255, .4);
     transition: background-color 150ms linear, text-shadow 150ms linear, color 150ms linear, border-color 150ms linear;
 
     &:hover, &:focus {
@@ -13,5 +14,9 @@ $--button-hover-fill: $--color-hover;
         color: $--button-default-color;
         background-color: $--button-hover-fill;
         text-shadow: $--button-default-color 0 0 10px;
+    }
+
+    @include when(disabled) {
+        background-color: $--button-default-fill;
     }
 }

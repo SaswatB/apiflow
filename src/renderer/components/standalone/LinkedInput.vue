@@ -45,7 +45,7 @@
 
 <style lang="scss">
 .linked-input.el-input {
-  input,input::placeholder, button {
+  input::placeholder {
     transition: color 150ms linear;
   }
   &.linked {

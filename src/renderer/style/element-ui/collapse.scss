@@ -3,7 +3,7 @@ $--collapse-header-color: unset;
 $--collapse-header-hover-fill: $--color-hover; //TODO: make a var
 $--collapse-content-fill: unset;
 $--collapse-content-color: unset;
-$--collapse-border-color: #ffffff61;
+$--collapse-border-color: rgba(255, 255, 255, .4);
 @import "element-ui/packages/theme-chalk/src/collapse.scss";
 
 @include b(collapse) {

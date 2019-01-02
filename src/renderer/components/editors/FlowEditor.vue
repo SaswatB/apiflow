@@ -12,7 +12,7 @@
               Execute
               <el-button v-tooltip="'Run Flow'" class="exec-btn" @click="runFlow"><i class="mdi mdi-send"/></el-button>
             </el-tab-pane>
-            <!-- Results Pane -->
+            <!-- Log Pane -->
             <el-tab-pane class="log-container" label="Flow Log" name="results">
               <BlurredPopover
                 ref="addItemPopover"
@@ -47,7 +47,7 @@
               <el-row>
                 <el-col :span="7">
                   Node Options <br>
-                  <el-button v-tooltip="'Delete Node'" class="remove-btn" @click="deleteSelection"><i class="mdi mdi-delete"/></el-button>
+                  <el-button v-tooltip="'Delete Node'" class="remove-btn right-header-btn" @click="deleteSelection"><i class="mdi mdi-delete"/></el-button>
                   <hr>
                   <el-form label-width="60px" @submit.native.prevent="">
                     <el-form-item label="Type">
@@ -63,6 +63,12 @@
                 </el-col>
                 <el-col :span="9" class="node-options">
                   {{ selectedNode.data.type }} Options <br>
+                  <div v-if="nodeTypeSupportsLinkedValues" class="right-header-btn">
+                    <el-button v-tooltip="'No Linked Values Exposed'" v-if="nodeSettingsLinkedValues.length == 0" :disabled="true"><i class="mdi mdi-link"/></el-button>
+                    <el-badge v-else :value="nodeSettingsLinkedValues.length" class="item" type="primary">
+                      <el-button v-tooltip="'Edit Links'" @click="linkedValueEditorVisible = true"><i class="mdi mdi-link"/></el-button>
+                    </el-badge>
+                  </div>
                   <hr>
                   <el-form v-if="isRequestNode" label-width="60px" @submit.native.prevent="">
                     <el-form-item label="Request">
@@ -70,7 +76,6 @@
                         <el-option v-for="request in requests" :key="request.id" :label="request.name" :value="request.id"/>
                       </el-select>
                     </el-form-item>
-                    {{ nodeSettingsRequestLinks }}
                   </el-form>
                   <el-form v-else-if="isWSConnectNode" label-width="40px" @submit.native.prevent="">
                     <el-form-item label="URL">
@@ -97,7 +102,7 @@
                         <el-option label="Custom" value="custom"/>
                       </el-select>
                     </el-form-item>
-                    <el-form-item label="Link Policy">
+                    <el-form-item label="Linked Values Policy">
                       <el-select v-model="nodeSettings.linkPolicy" :disabled="isPlayNode" placeholder="Default">
                         <el-option label="Wait for links" value="wait"/>
                         <el-option label="Run on trigger" value="trigger"/>
@@ -140,7 +145,7 @@
               <el-row>
                 <el-col :span="12">
                   Edge Editor <br>
-                  <el-button v-tooltip="'Delete Edge'" class="remove-btn" @click="deleteSelection"><i class="mdi mdi-delete"/></el-button>
+                  <el-button v-tooltip="'Delete Edge'" class="remove-btn right-header-btn" @click="deleteSelection"><i class="mdi mdi-delete"/></el-button>
                   <hr>
                   From {{ selectedEdge.source.data.type }} Node to {{ selectedEdge.target.data.type }} Node
                 </el-col>
@@ -154,6 +159,30 @@
         </div>
       </SplitArea>
     </Split>
+    <el-dialog
+      :visible.sync="linkedValueEditorVisible"
+      title="Linked Value Editor">
+      <el-form label-width="120px" @submit.native.prevent="">
+        <div v-for="link in nodeSettingsLinkedValues" :key="link.id" class="code-field">
+          <span class="code-title">{{ link.name }}</span>
+          <div class="code-editor-wrapper">
+            <AceEditor
+              v-model="nodeSettings.linkedValueData[link.id]"
+              class="code-editor"
+              lang="javascript"
+              theme="merbivore_soft"
+              @init="linkedValueEditorInit"/>
+            <div v-if="nodeSettings.linkedValueData[link.id] == ''" class="code-editor-empty">
+              <span>Enter a Javascript expression...</span>
+            </div>
+          </div>
+        </div>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="linkedValueEditorVisible = false">Cancel</el-button>
+        <el-button type="primary" @click="linkedValueEditorVisible = false">Confirm</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -170,7 +199,7 @@
   import { FlowRunnerLogLevel, FlowRunnerLogEntryTargetPane, FlowRunnerLogEntry, FlowRunner } from "@/utils/FlowRunner"
   import { dumpObjectStrings } from "@/utils/utils"
 
-  import BlurredPopover from "@/components/standalone/BlurredPopover"
+  import BlurredPopover from "@/components/standalone/BlurredPopover.vue"
   import FlowDragDropGraph from "@/components/editors/FlowDragDropGraph.vue"
 
   @Component({ components: { AceEditor, BlurredPopover, FlowDragDropGraph } })
@@ -186,6 +215,7 @@
     selectedNode: any = {}
     selectedEdge: any = {}
     flowRunner = FlowRunner.placeholder()
+    linkedValueEditorVisible = false
 
     get requests() {
       let reqs = []
@@ -207,10 +237,12 @@
     get isSplitNode() { return this.selectedNode.data.type == FlowNodeType.Split}
     get isSleepNode() { return this.selectedNode.data.type == FlowNodeType.Sleep}
 
+    get nodeTypeSupportsLinkedValues() { return this.isRequestNode; }
+
     get nodeSettings() { 
-      let s = this.value.flowSettings[this.selectedNode.id];
+      let s = this.value.flowSettings[this.selectedNode.id]; // TODO: look into doing migrations here if necessary
       if(s == undefined) {
-        this.nodeSettings = {}
+        this.nodeSettings = { linkedValueData: {} };
         s = this.nodeSettings;
       }
       return s;
@@ -218,7 +250,7 @@
     set nodeSettings(settings) { Vue.set(this.value.flowSettings, this.selectedNode.id, settings) }
 
     get nodeSettingsRequest() { return this.ctx.requests[(this.nodeSettings as FlowNodeRequestSettings).requestId!]; }
-    get nodeSettingsRequestLinks() {
+    get nodeSettingsLinkedValues() {
       let links = [];
       let props = dumpObjectStrings(this.nodeSettingsRequest, ["response", "jsonPayload"]);
       for(let prop of props) {
@@ -319,6 +351,33 @@
     showFilterLog(event: any) {
       event.stopPropagation();
       // setTimeout(() => {this.$refs.addItemPopoverTextbox.focus()}, 150);
+    }
+
+    linkedValueEditorInit(editor: any) {
+      editor.setOptions({
+        minLines: 1,
+        maxLines: 15,
+        fontSize: "14px",
+        showLineNumbers: false,
+        enableBasicAutocompletion: true,
+        enableLiveAutocompletion: true
+      });
+      editor.renderer.setScrollMargin(10, 10);
+      editor.renderer.setPadding(20);
+      editor.renderer.setShowGutter(false);
+
+      var ace = require('brace');
+      var langTools = ace.acequire("ace/ext/language_tools");
+      let customCompleter = {
+        getCompletions: function(editor: any, session: any, pos: any, prefix: any, callback: any) {
+            // TODO: add completions
+            /* for example
+              * let TODO = ...;
+              * callback(null, [{name: TODO, value: TODO, score: 1, meta: TODO}]);
+              */
+        }
+      }
+      langTools.addCompleter(customCompleter);
     }
 
     onLogClick(logEntry: FlowRunnerLogEntry) {
@@ -475,10 +534,17 @@
         }
       }
 
-      .remove-btn {
+      .right-header-btn {
         position: absolute;
         top: 0px;
-        right: 0px;;
+        right: 0px;
+
+        .el-badge__content {
+          right: 2px;
+          transform: unset;
+          line-height: 15px;
+          pointer-events: none;
+        }
       }
 
       .el-tabs {
@@ -512,11 +578,39 @@
       .el-col {
         height: 100%;
         padding: 10px;
-        border-left: 1px solid #ffffff61;
+        border-left: 1px solid rgba(255, 255, 255, .4);
         position: relative;
         hr {
           margin: 10px 0;
         }
+      }
+    }
+  }
+
+  .code-field {
+    display: flex;
+    align-items: center;
+
+    .code-title {
+      padding: 10px;
+    }
+    .code-editor-wrapper {
+      position: relative;
+      flex-grow: 1;
+
+      .code-editor-empty {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 25px;
+        z-index: 10;
+
+        display: flex;
+        align-items: center;
+        pointer-events: none;
+
+        color: gray;
+        font-style: italic;
       }
     }
   }

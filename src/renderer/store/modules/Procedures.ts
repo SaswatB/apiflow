@@ -1,17 +1,17 @@
 import { Module, VuexModule, Mutation, Action } from "vuex-module-decorators" 
 import { onRenderer } from "@/../renderer/utils/utils"
 import { Procedure, ProcedureLinkedValue, ProcedureMap, ProcedureFolderItemType, ProcedureFolder, ProcedureRootFolderName, ProcedureFolderMap } from "@/../renderer/model/Procedure"
-import { Flow } from "@/../renderer/model/Flow"
-import { Request } from "@/../renderer/model/Request"
+import { FlowData, Flow } from "@/../renderer/model/Flow"
+import { RequestData, Request } from "@/../renderer/model/Request"
 
 @Module(onRenderer({ name: "procedures" }))
 export default class Procedures extends VuexModule {
   // TODO: implement projects
-  flows: ProcedureMap<Flow> = {}
+  flows: ProcedureMap<FlowData> = {}
     flowsCommitId = 0
   flowFolders: ProcedureFolderMap = { [ProcedureRootFolderName]: [] }
 
-  requests: ProcedureMap<Request> = {}
+  requests: ProcedureMap<RequestData> = {}
     requestsCommitId = 0
   requestFolders: ProcedureFolderMap = { [ProcedureRootFolderName]: [] }
 

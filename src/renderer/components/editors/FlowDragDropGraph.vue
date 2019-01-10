@@ -14,7 +14,7 @@
   import { ResizeObserver as ResizeObserverType } from "ResizeObserver.d.ts"
   declare var ResizeObserver: ResizeObserverType;
 
-  import { FlowNodeType, FlowRootNodeId, FlowPlayNodeId, getFlowNodeTypeIcon, FlowNode, FlowDagNode, Flow } from "@/model/Flow"
+  import { FlowNodeType, FlowRootNodeId, FlowPlayNodeId, getFlowNodeTypeIcon, FlowNode, FlowDagNode } from "@/model/Flow"
   import { hasPath, getTransformation, makeAbsoluteContext } from "@/utils/utils"
 
   const nodeRadius = 30;

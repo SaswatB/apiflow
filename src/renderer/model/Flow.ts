@@ -1,6 +1,6 @@
 import { Procedure, ProcedureLinkedValue, ProcedureMap } from "./Procedure"
 const clonedeep = require("lodash.clonedeep")
-import { Request } from "./Request"
+import { RequestData } from "./Request"
 
 export enum FlowNodeType {
   Root = "Root",
@@ -61,13 +61,16 @@ export interface FlowNodeSleepSettings extends FlowNodeSettings {
   sleep?: number
 }
 
-export interface FlowContext { // TODO: figure out a better solution for migrations for objects in this
-  flows: ProcedureMap<Flow>,
-  requests:  ProcedureMap<Request>,
+export interface FlowContext {
+  flows: ProcedureMap<FlowData>,
+  requests:  ProcedureMap<RequestData>,
   linkedValues:  {[index: string]: ProcedureLinkedValue}
 }
 
-export class Flow implements Procedure {
+//stub used to distinguish migrated and unmigrated objects
+export interface FlowData extends Procedure {}
+
+export class Flow implements FlowData {
   classVersion = 1
   id: string
   name: string
@@ -90,13 +93,13 @@ export class Flow implements Procedure {
     return new Flow("","");
   }
 
-  static getFromStore(flowMap: ProcedureMap<Flow>, id: string) {
+  static getFromStore(flowMap: ProcedureMap<FlowData>, id: string) {
     return Flow.migrate(clonedeep(flowMap[id]));
   }
 
   static migrate(obj: any) {
     const flow = Flow.placeholder();
-    Object.assign(flow, obj); //TODO: proper migrations
+    Object.assign(flow, obj);
     return flow;
   }
 }

@@ -22,6 +22,9 @@ export function getPayloadTypes(method: RequestMethod) {
   return [RequestPayloadType.None, ...(method == RequestMethod.Post ? [RequestPayloadType.JSON] : [])];
 }
 
+//stub used to distinguish migrated and unmigrated objects
+export interface RequestData extends Procedure {}
+
 export class Request implements Procedure {
   classVersion = 1
   id: string
@@ -56,13 +59,13 @@ export class Request implements Procedure {
     return new Request("","","","","");
   }
 
-  static getFromStore(requestMap: ProcedureMap<Request>, id: string) {
+  static getFromStore(requestMap: ProcedureMap<RequestData>, id: string) {
     return Request.migrate(clonedeep(requestMap[id]));
   }
 
   static migrate(obj: any) {
     const req = Request.placeholder();
-    Object.assign(req, obj); //TODO: proper migrations
+    Object.assign(req, obj);
     return req;
   }
 

@@ -56,7 +56,7 @@
   import { v4 as uuidv4 } from "uuid";
 
   import { Procedure, ProcedureRootFolderName } from "@/model/Procedure"
-  import { Flow } from "@/model/Flow"
+  import { Flow, FlowContext } from "@/model/Flow"
   import { Request } from "@/model/Request"
   import Procedures from "@/store/modules/Procedures" // TODO: fix reference to use @
   import Counter from "@/store/modules/Counter"
@@ -78,9 +78,9 @@
     flowTree: Array<object> = []
     requestTree: Array<object> = []
     editorType = ""
-    flowEdit:Flow = Flow.placeholder()
-    flowCtx = {flows: this.ProceduresStore.flows, requests: this.ProceduresStore.requests, linkedValues: this.ProceduresStore.linkedValues}
-    requestEdit:Request = Request.placeholder()
+    flowEdit: Flow = Flow.placeholder()
+    flowCtx: FlowContext = {flows: this.ProceduresStore.flows, requests: this.ProceduresStore.requests, linkedValues: this.ProceduresStore.linkedValues}
+    requestEdit: Request = Request.placeholder()
 
     created() {
       this.CounterStore.incrementCounter();

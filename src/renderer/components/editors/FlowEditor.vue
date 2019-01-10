@@ -2,7 +2,7 @@
   <div class="flow-pane">
     <Split :gutter-size="2" direction="vertical">
       <SplitArea :size="53" :min-size="350">
-        <FlowDragDropGraph ref="graph" v-model="value.flowData" @node-selected="nodeSelected" @edge-selected="edgeSelected"/>
+        <FlowDragDropGraph ref="graph" v-model="value.nodes" @node-selected="nodeSelected" @edge-selected="edgeSelected"/>
       </SplitArea>
       <SplitArea :size="47">
         <div class="prop-editor">
@@ -129,8 +129,7 @@
               <div class="log code">
                 <el-button v-tooltip="'Copy Log'" class="copy-btn" @click="copyLog(selectedNode.id)"><i class="mdi mdi-content-copy"/></el-button>
                 <span
-                  v-for="(entry, index) in flowRunner.log"
-                  v-if="entry.nodeId === selectedNode.id"
+                  v-for="(entry, index) in nodeLog"
                   :key="index"
                   :class="getClassFromLogLevel(entry.level)"
                   class="entry">
@@ -163,7 +162,7 @@
       :visible.sync="linkedValueEditorVisible"
       title="Linked Value Editor">
       <el-form label-width="120px" @submit.native.prevent="">
-        <div v-for="link in nodeSettingsLinkedValues" :key="link.id" class="code-field">
+        <div v-for="link in nodeSettingsLinkedValues" :key="selectedNode.id + '_' + link.id" class="code-field">
           <span class="code-title">{{ link.name }}</span>
           <div class="code-editor-wrapper">
             <AceEditor
@@ -172,7 +171,7 @@
               lang="javascript"
               theme="merbivore_soft"
               @init="linkedValueEditorInit"/>
-            <div v-if="nodeSettings.linkedValueData[link.id] == ''" class="code-editor-empty">
+            <div v-if="!nodeSettings.linkedValueData[link.id]" class="code-editor-empty">
               <span>Enter a Javascript expression...</span>
             </div>
           </div>
@@ -240,14 +239,17 @@
     get nodeTypeSupportsLinkedValues() { return this.isRequestNode; }
 
     get nodeSettings() { 
-      let s = this.value.flowSettings[this.selectedNode.id]; // TODO: look into doing migrations here if necessary
+      let s = this.value.nodeSettingsMap[this.selectedNode.id]; // TODO: look into doing migrations here if necessary
       if(s == undefined) {
         this.nodeSettings = { linkedValueData: {} };
         s = this.nodeSettings;
       }
+      Vue.set(s, "linkedValueData", new Proxy(s.linkedValueData || {}, {
+        get(target, name) { return target[name.toString()] || ""; }
+      }));
       return s;
     }
-    set nodeSettings(settings) { Vue.set(this.value.flowSettings, this.selectedNode.id, settings) }
+    set nodeSettings(settings) { Vue.set(this.value.nodeSettingsMap, this.selectedNode.id, settings) }
 
     get nodeSettingsRequest() { return this.ctx.requests[(this.nodeSettings as FlowNodeRequestSettings).requestId!]; }
     get nodeSettingsLinkedValues() {
@@ -275,6 +277,10 @@
       return "// No Data"
     }
     set nodePrettyResult(ignored) {}
+
+    get nodeLog() {
+      return this.flowRunner.log.filter((entry) => entry.nodeId === this.selectedNode.id);
+    }
 
     @Watch("activePropEditor")
     handleActivePropEditorChanged(val: string) {
@@ -354,30 +360,54 @@
     }
 
     linkedValueEditorInit(editor: any) {
+      let customCompleters = [{
+        getCompletions: (editor: any, session: any, pos: any, prefix: any, callback: any) => {
+          console.log(session)
+          // get the index of the token before the cursor
+          let idStart = pos.column - prefix.length;
+          let idIndex = undefined;
+          for(let token of session.bgTokenizer.lines[pos.row]) {
+            if(token.start === idStart) {
+              idIndex = token.index - 1;
+              break;
+            }
+            if(token.start === idStart - token.value.length) {
+              idIndex = token.index;
+              break;
+            }
+          }
+          // disable autocomplete if there's a dot operator preceding the cursor
+          if(idIndex !== undefined) {
+            for(let i = idIndex; i >= 0; i--) {
+              let token = session.bgTokenizer.lines[pos.row][i];
+              if(token.type === "text" || token.type.startsWith("comment")) continue;
+              if(token.type === "punctuation.operator") return;
+              break;
+            }
+          }
+          // populate the auto complete with the flow node names
+          let nodeOptions = this.value.nodes.map((node) => {
+            let nodeSettings = this.value.nodeSettingsMap[node.id];
+            if(nodeSettings && nodeSettings.name)
+              return {name: nodeSettings.name, value: nodeSettings.name, score: 1, meta: "flow node"};
+            return undefined;
+          }).filter((val) => val)
+
+          callback(null, nodeOptions);
+        }
+      }]
+
       editor.setOptions({
         minLines: 1,
         maxLines: 15,
         fontSize: "14px",
         showLineNumbers: false,
-        enableBasicAutocompletion: true,
+        enableBasicAutocompletion: customCompleters,
         enableLiveAutocompletion: true
       });
       editor.renderer.setScrollMargin(10, 10);
       editor.renderer.setPadding(20);
       editor.renderer.setShowGutter(false);
-
-      var ace = require('brace');
-      var langTools = ace.acequire("ace/ext/language_tools");
-      let customCompleter = {
-        getCompletions: function(editor: any, session: any, pos: any, prefix: any, callback: any) {
-            // TODO: add completions
-            /* for example
-              * let TODO = ...;
-              * callback(null, [{name: TODO, value: TODO, score: 1, meta: TODO}]);
-              */
-        }
-      }
-      langTools.addCompleter(customCompleter);
     }
 
     onLogClick(logEntry: FlowRunnerLogEntry) {

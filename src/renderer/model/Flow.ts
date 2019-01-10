@@ -61,7 +61,7 @@ export interface FlowNodeSleepSettings extends FlowNodeSettings {
   sleep?: number
 }
 
-export interface FlowContext {
+export interface FlowContext { // TODO: figure out a better solution for migrations for objects in this
   flows: ProcedureMap<Flow>,
   requests:  ProcedureMap<Request>,
   linkedValues:  {[index: string]: ProcedureLinkedValue}
@@ -71,11 +71,11 @@ export class Flow implements Procedure {
   classVersion = 1
   id: string
   name: string
-  flowData: Array<FlowNode> = [ // two default nodes that need to be in every dag
+  nodes: Array<FlowNode> = [ // two default nodes that need to be in every dag
     { "id": FlowRootNodeId, "type": FlowNodeType.Root, "parentIds": [] },
     { "id": FlowPlayNodeId, "type": FlowNodeType.Play, "parentIds": [FlowRootNodeId]}
   ];
-  flowSettings: {[index: string]: FlowNodeSettings} = {}
+  nodeSettingsMap: {[index: string]: FlowNodeSettings} = {}
 
   private constructor(id:string, name: string) {
     this.id = id

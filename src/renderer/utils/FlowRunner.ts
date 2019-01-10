@@ -37,7 +37,7 @@ export class FlowRunner {
     this.flow = flow;
     this.ctx = ctx;
 
-    this.dagRoot = d3dag.dratify()(flow.flowData);
+    this.dagRoot = d3dag.dratify()(flow.nodes);
   }
 
   static placeholder() {
@@ -72,7 +72,7 @@ export class FlowRunner {
   }
 
   validateNode(node: FlowDagNode) {
-    let nodeSettings = this.flow.flowSettings[node.id] || {};
+    let nodeSettings = this.flow.nodeSettingsMap[node.id] || {};
     let valid = true;
 
     this.addLog(FlowRunnerLogLevel.VERBOSE, "Validating " + nodeNamePrint(node.data.type, nodeSettings.name), node.id, FlowRunnerLogEntryTargetPane.LogViewer);
@@ -109,7 +109,7 @@ export class FlowRunner {
   }
 
   runNode(node: FlowDagNode) {
-    let nodeSettings = this.flow.flowSettings[node.id] || {};
+    let nodeSettings = this.flow.nodeSettingsMap[node.id] || {};
 
     this.addLog(FlowRunnerLogLevel.VERBOSE, "Running " + nodeNamePrint(node.data.type, nodeSettings.name), node.id, FlowRunnerLogEntryTargetPane.LogViewer);
 
@@ -154,7 +154,7 @@ export class FlowRunner {
   }
 
   runRequestNode(node: FlowDagNode) {
-    let nodeSettings = this.flow.flowSettings[node.id] || {};
+    let nodeSettings = this.flow.nodeSettingsMap[node.id] || {};
     let request = Request.getFromStore(this.ctx.requests, (nodeSettings as FlowNodeRequestSettings).requestId!);
 
     return request.sendRequest(nodeSettings.linkedValueData || {});

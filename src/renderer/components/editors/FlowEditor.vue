@@ -13,7 +13,7 @@
               <el-button v-tooltip="'Run Flow'" class="exec-btn" @click="runFlow"><i class="mdi mdi-send"/></el-button>
             </el-tab-pane>
             <!-- Log Pane -->
-            <el-tab-pane class="log-container" label="Flow Log" name="results">
+            <el-tab-pane label="Flow Log" name="results" class="log-container">
               <BlurredPopover
                 ref="addItemPopover"
                 :width="200"
@@ -125,7 +125,7 @@
                 height="100%"/>
             </el-tab-pane>
             <!-- Node Log -->
-            <el-tab-pane v-if="isNodeEditor" class="log-container" label="Node Log" name="node-log">
+            <el-tab-pane v-if="isNodeEditor" label="Node Log" name="node-log" class="log-container">
               <div class="log code">
                 <el-button v-tooltip="'Copy Log'" class="copy-btn" @click="copyLog(selectedNode.id)"><i class="mdi mdi-content-copy"/></el-button>
                 <span
@@ -178,8 +178,7 @@
         </div>
       </el-form>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="linkedValueEditorVisible = false">Cancel</el-button>
-        <el-button type="primary" @click="linkedValueEditorVisible = false">Confirm</el-button>
+        <el-button type="primary" @click="linkedValueEditorVisible = false">Close</el-button>
       </span>
     </el-dialog>
   </div>
@@ -381,7 +380,7 @@
             for(let i = idIndex; i >= 0; i--) {
               let token = session.bgTokenizer.lines[pos.row][i];
               if(token.type === "text" || token.type.startsWith("comment")) continue;
-              if(token.type === "punctuation.operator") return;
+              if(token.value === ".") return;
               break;
             }
           }
@@ -393,6 +392,8 @@
             return undefined;
           }).filter((val) => val)
 
+          nodeOptions.push({name: "$caller", value: "$caller", score: .5, meta: "context"});
+
           callback(null, nodeOptions);
         }
       }]
@@ -402,8 +403,7 @@
         maxLines: 15,
         fontSize: "14px",
         showLineNumbers: false,
-        enableBasicAutocompletion: customCompleters,
-        enableLiveAutocompletion: true
+        enableBasicAutocompletion: customCompleters
       });
       editor.renderer.setScrollMargin(10, 10);
       editor.renderer.setPadding(20);
@@ -481,6 +481,18 @@
       height: 100%;
       padding: 0 10px;
       background-color: rgba(0,0,0,.2);
+
+      #tab-results {
+        transition: border-bottom .5s ease-in-out;
+        &:not(:last-child) {
+          border-bottom: 1px solid rgba(255, 255, 255, .4)
+        }
+      }
+
+      #tab-node-editor, #tab-node-results, #tab-node-log,
+      #tab-edge-editor, #tab-edge-log {
+        animation: fadeIn .5s ease-in-out;
+      }
 
       .node-editor, .edge-editor {
         height: 100%;

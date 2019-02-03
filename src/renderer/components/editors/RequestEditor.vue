@@ -173,15 +173,15 @@
 
     @Watch("value")
     async handleValueChanged() {
-      if(this.transitionClone == undefined) return;
-      let element = (this.transitionClone as HTMLElement);
-      this.transitionClone = undefined;
-      //push away the clone
-      element.style.animation = "push-right 500ms 1 forwards cubic-bezier(.5,0,1,.5)";
-      //remove the clone after the animation
-      setTimeout(() => {
-        this.$el.parentElement!.removeChild(element);
-      }, 750);
+      // if(this.transitionClone == undefined) return;
+      // let element = (this.transitionClone as HTMLElement);
+      // this.transitionClone = undefined;
+      // //push away the clone
+      // element.style.animation = "push-right 500ms 1 forwards cubic-bezier(.5,0,1,.5)";
+      // //remove the clone after the animation
+      // setTimeout(() => {
+      //   this.$el.parentElement!.removeChild(element);
+      // }, 750);
     }
 
     addHeader() {
@@ -257,15 +257,15 @@
      * after this call, which will finish the transition
      */
     prepareTransition() {
-      //clone ourself
-      let fromParent = this.$el.parentElement;
-      this.transitionClone = this.$el.cloneNode(true);
-      const position = this.$el.getBoundingClientRect();
-      fromParent!.appendChild(this.transitionClone!);
-      //set an explict width to allow the margin-left animation to work properly
-      (this.transitionClone as HTMLElement).style.width = position.width + "px";
-      //use incrementally lower z-index so that new clones appear under older ones
-      (this.transitionClone as HTMLElement).style.zIndex = (this.zIndex--)+"";
+      // //clone ourself
+      // let fromParent = this.$el.parentElement;
+      // this.transitionClone = this.$el.cloneNode(true);
+      // const position = this.$el.getBoundingClientRect();
+      // fromParent!.appendChild(this.transitionClone!);
+      // //set an explict width to allow the margin-left animation to work properly
+      // (this.transitionClone as HTMLElement).style.width = position.width + "px";
+      // //use incrementally lower z-index so that new clones appear under older ones
+      // (this.transitionClone as HTMLElement).style.zIndex = (this.zIndex--)+"";
     }
   }
 </script>

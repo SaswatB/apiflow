@@ -33,7 +33,7 @@ export default class Procedures extends VuexModule {
 
   @Mutation _setOpenProcedure(procedure: string) { this.openProcedure = procedure }
 
-  
+
   @Action({commit: "_addFlowToFolder"}) addFlowToFolder({flowId, folderName}: {flowId: string, folderName: string}) { return {flowId, folderName} }
   @Action({commit: "_addRequestToFolder"}) addRequestToFolder({requestId, folderName}: {requestId: string, folderName: string}) { return {requestId, folderName} }
 

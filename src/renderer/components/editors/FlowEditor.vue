@@ -283,8 +283,12 @@
 
     @Watch("activePropEditor")
     handleActivePropEditorChanged(val: string) {
-      if(val === "node-results")
-        (this.$refs.nodeResultViewer as any).editor.setReadOnly(true);
+      if(val === "node-results") {
+        const ace = (this.$refs.nodeResultViewer as any);
+        if(ace) {
+          ace.editor.setReadOnly(true);
+        }
+      }
     }
 
     nodeSelected(node: any) {

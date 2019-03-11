@@ -215,7 +215,7 @@
       for(let i = 0; i < linkedValueIds.length; i++) {
         const link = this.ProceduresStore.linkedValues[linkedValueIds[i]]
         if(link !== undefined) {
-          linkedValues[linkedValueIds[i]] = link.value;
+          linkedValues[linkedValueIds[i]] = "\"" + link.value.replace("\\", "\\\\").replace("\"", "\\\"") + "\"";
         }
       }
       return linkedValues

@@ -1,6 +1,7 @@
 import { Procedure, newLinkedValueId, ProcedureMap } from "./Procedure"
 const clonedeep = require("lodash.clonedeep")
 import axios from "axios"
+import { VM } from 'vm2';
 
 export enum RequestMethod {
   Get = "GET",
@@ -70,6 +71,11 @@ export class Request implements Procedure {
   }
 
   sendRequest(linkedValueData: {[index: string]: string}) {
+    const vm = new VM({
+        timeout: 1000,
+        sandbox: {}
+    });
+
     if(this.method === undefined) {
       return Promise.reject("Method not provided");
     }
@@ -85,20 +91,20 @@ export class Request implements Procedure {
       }
     }
     for(let header of this.headers) {
-      const nameLink = linkedValueData[header.name]
-      const valueLink = linkedValueData[header.value]
+      const nameLink = vm.run(linkedValueData[header.name])
+      const valueLink = vm.run(linkedValueData[header.value])
       if(nameLink !== undefined && valueLink !== undefined) {
         args.headers[nameLink] = valueLink
       }
     }
     if(this.authType === RequestAuthenticationType.Basic) {
-      const usernameLink = linkedValueData[this.authSimpleUsername]
-      const passwordLink = linkedValueData[this.authSimplePassword]
+      const usernameLink = vm.run(linkedValueData[this.authSimpleUsername])
+      const passwordLink = vm.run(linkedValueData[this.authSimplePassword])
       if(usernameLink !== undefined && passwordLink !== undefined) {
         args.headers["Authorization"] = "Basic " + btoa(usernameLink + ":" + passwordLink);
       }
     } else if(this.authType === RequestAuthenticationType.Bearer) {
-      const tokenLink = linkedValueData[this.authToken]
+      const tokenLink = vm.run(linkedValueData[this.authToken])
       if(tokenLink !== undefined) {
         args.headers["Authorization"] = "Bearer " + tokenLink;
       }

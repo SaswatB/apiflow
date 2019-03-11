@@ -633,6 +633,14 @@
   resolved "https://registry.yarnpkg.com/@mdi/font/-/font-3.0.39.tgz#8a388ec9816939eff2099120102073aecdf6e5f8"
   integrity sha512-VnPxEXsiV+YP9NO7XyQEvs1tBxkmtPzib9dRq/1CqubaZy9oeP7Jmgd/IEya8Z3bVyj+NZpwS0YGZW1kvx2eFQ==
 
+"@soleng-fuze/electron-debug@^1.5.2":
+  version "1.5.2"
+  resolved "https://registry.yarnpkg.com/@soleng-fuze/electron-debug/-/electron-debug-1.5.2.tgz#79a3e7d6eb96e447ab32156f37b355fd22dab8cc"
+  integrity sha512-JALdDXrYFNP0bkHZIzu1HkREloMpy79lFCN8qIrnO1R5Qx6fAQnjYWDMjnnmohik1Z18p1I34KJa2rZg6FcP2A==
+  dependencies:
+    electron-is-dev "^0.3.0"
+    electron-localshortcut "^3.0.0"
+
 "@types/d3-array@*":
   version "1.2.4"
   resolved "https://registry.yarnpkg.com/@types/d3-array/-/d3-array-1.2.4.tgz#7088445c8717ba1fba416a1df7bbd11cc72a3763"
@@ -4317,14 +4325,6 @@ electron-chromedriver@~3.0.0:
   dependencies:
     electron-download "^4.1.0"
     extract-zip "^1.6.5"
-
-electron-debug@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/electron-debug/-/electron-debug-2.0.0.tgz#3059a6557acbfb091f138d83875f57bac80cea6d"
-  integrity sha512-orGlw9uErUztdD7cgdKz78txq3czpOnKG/zvvsINkUsugqL+dn77UFrbwRGVgPwuLJ7Ejbjjk9EcxIcgTivMbA==
-  dependencies:
-    electron-is-dev "^0.3.0"
-    electron-localshortcut "^3.0.0"
 
 electron-devtools-installer@^2.2.4:
   version "2.2.4"

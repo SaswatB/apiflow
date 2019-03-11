@@ -57,6 +57,7 @@
   },
   "dependencies": {
     "@mdi/font": "^3.0.39",
+    "@soleng-fuze/electron-debug": "^1.5.2",
     "@types/d3": "^5.0.1",
     "@types/lodash": "^4.14.118",
     "@types/lodash.clonedeep": "^4.5.4",
@@ -116,7 +117,6 @@
     "devtron": "^1.4.0",
     "electron": "^3.0.9",
     "electron-builder": "^20.19.2",
-    "electron-debug": "^2.0.0",
     "electron-devtools-installer": "^2.2.4",
     "electron-react-devtools": "^0.5.3",
     "eslint": "^5.9.0",

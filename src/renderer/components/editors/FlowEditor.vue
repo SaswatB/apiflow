@@ -7,9 +7,8 @@
       <SplitArea :size="47">
         <div class="prop-editor">
           <el-tabs v-model="activePropEditor" :tab-position="'left'">
-            <!-- Execute Pane -->
-            <el-tab-pane label="Execute" name="execute">
-              Execute
+            <!-- Flow Editor Pane -->
+            <el-tab-pane label="Flow Editor" name="flow-editor">
               <el-button v-tooltip="'Run Flow'" class="exec-btn" @click="runFlow"><i class="mdi mdi-send"/></el-button>
             </el-tab-pane>
             <!-- Log Pane -->
@@ -40,6 +39,7 @@
                   <span class="entry-level">{{ getFormattedTagFromLogLevel(entry.level) }}</span>
                   {{ entry.entry }}
                 </span>
+                <span v-if="flowRunner.log.length === 0" class="muted">No Logs</span>
               </div>
             </el-tab-pane>
             <!-- Node Editor -->
@@ -137,6 +137,7 @@
                   <span class="entry-level">{{ getFormattedTagFromLogLevel(entry.level) }}</span>
                   {{ entry.entry }}
                 </span>
+                <span v-if="nodeLog.length === 0" class="muted">No Logs</span>
               </div>
             </el-tab-pane>
             <!-- Edge Editor -->
@@ -209,7 +210,7 @@
     logFullTimeFormat = "L-HH:mm:ss.SSS" // TODO: add full date format as an option when viewing logs
     logLevelFilter = "verbose" // TODO: persist
     propEditor = "none"
-    activePropEditor = "execute"
+    activePropEditor = "flow-editor"
     selectedNode: any = {}
     selectedEdge: any = {}
     flowRunner = FlowRunner.placeholder()

@@ -66,7 +66,7 @@ export class FlowRunner {
     }
     // run the flow, starting from the play node
     this.addLog(FlowRunnerLogLevel.INFORMATION, "Running Flow");
-    return (this.runNode(playNode)as any).finally(() => {
+    return this.runNode(playNode).finally(() => {
       this.addLog(FlowRunnerLogLevel.INFORMATION, "Finished Flow");
     });
   }
@@ -108,7 +108,7 @@ export class FlowRunner {
     return valid;
   }
 
-  runNode(node: FlowDagNode) {
+  runNode(node: FlowDagNode, context: object = {}) {
     let nodeSettings = this.flow.nodeSettingsMap[node.id] || {};
 
     this.addLog(FlowRunnerLogLevel.VERBOSE, "Running " + nodeNamePrint(node.data.type, nodeSettings.name), node.id, FlowRunnerLogEntryTargetPane.LogViewer);
@@ -123,14 +123,15 @@ export class FlowRunner {
     let execPromise: Promise<any>;
     switch(node.data.type) {
       case FlowNodeType.Request:
-        execPromise = this.runRequestNode(node).then((data) => {
+        execPromise = this.runRequestNode(node, context).then((data) => {
           this.addLog(FlowRunnerLogLevel.INFORMATION, "Got results for " + nodeNamePrint(node.data.type, nodeSettings.name), node.id, FlowRunnerLogEntryTargetPane.ResultViewer);
           // save the result data
-          this.addNodeResult(node.id, data)
+          this.addNodeResult(node.id, data);
+          return Promise.resolve(data);
         }).catch((err) => {
           if(typeof err === "object") {
             // save the error as the result
-            this.addNodeResult(node.id, err)
+            this.addNodeResult(node.id, err);
           }
           return Promise.reject(err);
         });
@@ -147,17 +148,23 @@ export class FlowRunner {
 
     // run any children
     if(node.children.length > 0) {
-      execPromise = execPromise.then(() => Promise.all(node.children.map(this.runNode, this)));
+      execPromise = execPromise.then((data) => Promise.all(node.children.map((child) => {
+        let subContext : {[index: string]: object} = { ...context };
+        if(nodeSettings.name) {
+          subContext[nodeSettings.name] = data;
+        }
+        return this.runNode(child, subContext);
+      }, this)));
     }
     
     return execPromise;
   }
 
-  runRequestNode(node: FlowDagNode) {
+  runRequestNode(node: FlowDagNode, context: object) {
     let nodeSettings = this.flow.nodeSettingsMap[node.id] || {};
     let request = Request.getFromStore(this.ctx.requests, (nodeSettings as FlowNodeRequestSettings).requestId!);
 
-    return request.sendRequest(nodeSettings.linkedValueData || {});
+    return request.sendRequest(nodeSettings.linkedValueData || {}, context);
   }
 
   addLog(level: FlowRunnerLogLevel, entry: string, nodeId?: string, targetPane?: FlowRunnerLogEntryTargetPane) {

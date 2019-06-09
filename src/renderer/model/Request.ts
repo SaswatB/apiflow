@@ -70,10 +70,10 @@ export class Request implements Procedure {
     return req;
   }
 
-  sendRequest(linkedValueData: {[index: string]: string}) {
+  sendRequest(linkedValueData: {[index: string]: string}, sandbox: object = {}) {
     const vm = new VM({
         timeout: 1000,
-        sandbox: {}
+        sandbox
     });
 
     if(this.method === undefined) {

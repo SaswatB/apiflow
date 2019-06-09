@@ -141,7 +141,7 @@
 
 <style lang="scss">
   .frame {
-    height: 100%; //calc(100% - 30px); // TODO: uncomment when custom titlebar is enabled
+    height: calc(100% - 30px);
 
     .sidebar {
       background-color: rgba(0, 0, 0, .2);

@@ -29,7 +29,6 @@ module.exports = {
     "generator-star-spacing": 0,
     // allow debugger during development
     "no-debugger": process.env.NODE_ENV === "production" ? 2 : 0,
-    // TODO: remove
     "no-console": 0,
     // limit number of html attributes on each line
     "vue/max-attributes-per-line": [2, {

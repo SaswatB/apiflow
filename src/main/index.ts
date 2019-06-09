@@ -28,10 +28,11 @@ function createWindow () {
     useContentSize: true,
     webPreferences: {
       experimentalFeatures: true,
-      webSecurity: false // TODO: disable
-    }
+      webSecurity: false, // TODO: disable
+      nodeIntegration: true,
+    },
     // Remove the window frame
-    // frame: false, // TODO: uncomment when custom titlebar is enabled, waiting on https://github.com/electron/electron/issues/14787
+    frame: false,
   })
 
   //remove the default menu

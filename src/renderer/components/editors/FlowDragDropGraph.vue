@@ -42,10 +42,10 @@
     @Prop(Array) value!: Array<FlowNode>
 
     // svg and its main content groups
-    baseSvg!: d3.Selection<SVGSVGElement, {}, null, undefined>
-    dagGroup!: d3.Selection<SVGGElement, {}, null, undefined>
-    dagOverlayGroup!: d3.Selection<SVGGElement, {}, null, undefined>
-    sidebarGroup!: d3.Selection<SVGGElement, {}, null, undefined>
+    baseSvg!: d3.Selection<SVGSVGElement, unknown, null, undefined>
+    dagGroup!: d3.Selection<SVGGElement, unknown, null, undefined>
+    dagOverlayGroup!: d3.Selection<SVGGElement, unknown, null, undefined>
+    sidebarGroup!: d3.Selection<SVGGElement, unknown, null, undefined>
     // size of the svg
     height = 0
     width = 0

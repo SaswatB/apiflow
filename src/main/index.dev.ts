@@ -8,7 +8,7 @@
 /* eslint-disable */
 import { app } from "electron"
 
-// Install `electron-debug` with `devtron`
+// Install `electron-debug`
 require("@soleng-fuze/electron-debug")({ showDevTools: true })
 
 // Install `vue-devtools`

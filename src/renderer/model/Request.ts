@@ -1,5 +1,5 @@
 import { Procedure, newLinkedValueId, ProcedureMap } from "./Procedure"
-const clonedeep = require("lodash.clonedeep")
+import { cloneDeep } from "lodash";
 import axios from "axios"
 import { VM } from 'vm2';
 
@@ -61,7 +61,7 @@ export class Request implements Procedure {
   }
 
   static getFromStore(requestMap: ProcedureMap<RequestData>, id: string) {
-    return Request.migrate(clonedeep(requestMap[id]));
+    return Request.migrate(cloneDeep(requestMap[id]));
   }
 
   static migrate(obj: any) {

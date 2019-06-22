@@ -1,5 +1,5 @@
 import { Procedure, ProcedureLinkedValue, ProcedureMap } from "./Procedure"
-const clonedeep = require("lodash.clonedeep")
+import { cloneDeep } from 'lodash';
 import { RequestData } from "./Request"
 
 export enum FlowNodeType {
@@ -94,7 +94,7 @@ export class Flow implements FlowData {
   }
 
   static getFromStore(flowMap: ProcedureMap<FlowData>, id: string) {
-    return Flow.migrate(clonedeep(flowMap[id]));
+    return Flow.migrate(cloneDeep(flowMap[id]));
   }
 
   static migrate(obj: any) {

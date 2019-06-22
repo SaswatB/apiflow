@@ -71,4 +71,9 @@ body {
     from {
       opacity: 0;
     }
-  }
+}
+
+.morphing-collapse .el-collapse-item__content {
+    transition: height 150ms linear;
+    position: relative;
+}

@@ -187,14 +187,11 @@
 
 <script lang="ts">
   import { Vue, Component, Prop, Watch } from "vue-property-decorator"
-  import { getModule } from "vuex-module-decorators"
   import AceEditor from "vue2-ace-editor"
   import isURL from "validator/lib/isURL"
   const beautify = require("js-beautify").js
 
-  import { ProcedureLinkedValue, ProcedureMap } from "@/model/Procedure"
   import { FlowNodeType, FlowPlayNodeId, FlowNodeRequestSettings, FlowNodeSleepSettings, FlowContext, Flow } from "@/model/Flow"
-  import { Request } from "@/model/Request"
   import { FlowRunnerLogLevel, FlowRunnerLogEntryTargetPane, FlowRunnerLogEntry, FlowRunner } from "@/utils/FlowRunner"
   import { dumpObjectStrings } from "@/utils/utils"
 
@@ -463,7 +460,7 @@
         this.$notify.error({title: "Invalid URL", message: ""});
         return;
       }
-      let connectSuccess = false;
+      // let connectSuccess = false;
       const ws = new WebSocket(url);
       ws.onopen = () => {
         ws.close();

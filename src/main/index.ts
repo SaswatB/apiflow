@@ -1,20 +1,10 @@
-"use strict"
-
 import { app, BrowserWindow } from "electron"
+import * as path from "path"
+import { format as formatUrl } from "url"
 import "@/../renderer/store/index.ts"
 
-/**
- * Set `__static` path to static files in production
- * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
- */
-if (process.env.NODE_ENV !== "development") {
-  (global as any).__static = require("path").join(__dirname, "/static").replace(/\\/g, "\\\\")
-}
-
+const isDevelopment = process.env.NODE_ENV !== "production"
 let mainWindow: BrowserWindow | null = null
-const winURL = process.env.NODE_ENV === "development"
-  ? `http://localhost:9080`
-  : `file://${__dirname}/index.html`
 
 function createWindow () {
   /**
@@ -38,9 +28,19 @@ function createWindow () {
   //remove the default menu
   mainWindow.setMenu(null)
 
-  // mainWindow.setWindowButtonVisibility(false)
+  if (isDevelopment) {
+    mainWindow.webContents.openDevTools()
+  }
 
-  mainWindow.loadURL(winURL)
+  if (isDevelopment) {
+    mainWindow.loadURL(`http://localhost:${process.env.ELECTRON_WEBPACK_WDS_PORT}`)
+  } else {
+    mainWindow.loadURL(formatUrl({
+      pathname: path.join(__dirname, "index.html"),
+      protocol: "file",
+      slashes: true
+    }))
+  }
 
   mainWindow.on("closed", () => {
     mainWindow = null

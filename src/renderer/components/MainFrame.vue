@@ -55,7 +55,7 @@
   import { getModule } from "vuex-module-decorators"
   import { v4 as uuidv4 } from "uuid";
 
-  import { Procedure, ProcedureRootFolderName } from "@/model/Procedure"
+  import { ProcedureRootFolderName } from "@/model/Procedure"
   import { Flow, FlowContext } from "@/model/Flow"
   import { Request } from "@/model/Request"
   import Procedures from "@/store/modules/Procedures" // TODO: fix reference to use @

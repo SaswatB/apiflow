@@ -15,7 +15,7 @@ yarn install
 yarn run dev
 
 # build electron application for production
-yarn run build
+yarn run compile
 
 # run unit & end-to-end tests
 yarn test

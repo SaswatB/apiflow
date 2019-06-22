@@ -23,7 +23,7 @@
     <slot name="reference"></slot>
   </span>
 </template>
-<script>
+<script lang="ts">
 /* eslint-disable */
 import Popper from 'element-ui/src/utils/vue-popper';
 import { on, off } from 'element-ui/src/utils/dom';

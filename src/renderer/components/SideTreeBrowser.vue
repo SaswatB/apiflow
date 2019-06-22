@@ -56,7 +56,7 @@
   </el-collapse-item>
 </template>
 
-<script>
+<script lang="ts">
   import { mapActions, mapState } from "vuex"
   import BlurredPopover from "@/components/standalone/BlurredPopover"
 

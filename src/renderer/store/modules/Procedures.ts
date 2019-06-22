@@ -1,6 +1,6 @@
 import { Module, VuexModule, Mutation, Action } from "vuex-module-decorators" 
 import { onRenderer } from "@/../renderer/utils/utils"
-import { Procedure, ProcedureLinkedValue, ProcedureMap, ProcedureFolderItemType, ProcedureFolder, ProcedureRootFolderName, ProcedureFolderMap } from "@/../renderer/model/Procedure"
+import { ProcedureLinkedValue, ProcedureMap, ProcedureFolderItemType, ProcedureRootFolderName, ProcedureFolderMap } from "@/../renderer/model/Procedure"
 import { FlowData, Flow } from "@/../renderer/model/Flow"
 import { RequestData, Request } from "@/../renderer/model/Request"
 

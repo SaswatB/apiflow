@@ -1,4 +1,5 @@
 {
+  "extends": "./node_modules/electron-webpack/tsconfig-base.json",
   "compilerOptions": {
     "baseUrl": ".",
     "paths": { "*": ["types/*"], "@/*":["src/main/*", "src/renderer/*"] },
@@ -14,8 +15,10 @@
     "moduleResolution": "node",
     "target": "es2015",
     "lib": ["es2016", "dom", "es2018.promise"],
-    "esModuleInterop": true
-
+    "esModuleInterop": true,
+    "jsx": "react",
+    "jsxFactory": "h",
+    "skipLibCheck": true
   },
-  "include": ["./src/**/*", "types/vue-shims.d.ts"]
+  "include": ["./src/**/*", "types/vue-shims.d.ts", "node_modules/vue-tsx-support/enable-check.d.ts"]
 }

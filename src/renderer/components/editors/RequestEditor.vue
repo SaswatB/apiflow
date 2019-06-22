@@ -109,7 +109,7 @@
   import Procedures from "@/store/modules/Procedures"
 
   import StoredLinkedInput from "@/components/StoredLinkedInput.vue"
-  import MorphingCollapse from "@/components/standalone/MorphingCollapse.vue"
+  import MorphingCollapse from "@/components/standalone/MorphingCollapse.tsx"
 
   @Component({ components: { AceEditor, StoredLinkedInput, MorphingCollapse } })
   export default class RequestEditor extends Vue {

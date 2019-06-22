@@ -5,7 +5,7 @@
 <script lang="ts">
   import { Component, Prop, Watch } from "vue-property-decorator"
   import { getModule } from "vuex-module-decorators"
-  import cloneDeep from 'lodash/cloneDeep'
+  import { cloneDeep } from 'lodash'
 
   import { ProcedureLinkedValue } from "@/model/Procedure"
   import Procedures from "@/store/modules/Procedures"

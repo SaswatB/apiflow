@@ -98,7 +98,7 @@
   const difference = require("lodash/difference")
   const beautify = require("js-beautify").js
 
-  const ace = require("brace");
+  require("brace");
   import "brace/ext/language_tools"
   import "brace/mode/javascript"
   import "brace/theme/merbivore_soft"

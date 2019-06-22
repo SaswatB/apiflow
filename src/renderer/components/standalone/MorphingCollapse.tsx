@@ -37,7 +37,6 @@ export default class MorphingCollapse extends Vue {
     };
   }
   beforeEnter(element: Element) {
-    console.log('be')
     const content = this.getContentElement() as HTMLElement;
     //skip the transform if we're hidden
     if(!this.isCollapseExpanded()) {
@@ -51,7 +50,6 @@ export default class MorphingCollapse extends Vue {
     content.style.height = content.getBoundingClientRect().height + "px";
   }
   enter(element: Element, done: Function) {
-    console.log('e')
     if(this.firstElement == null) {
       this.firstElement = {element, done};
     } else {
@@ -60,7 +58,6 @@ export default class MorphingCollapse extends Vue {
     }
   }
   leave(element: Element, done: Function) {
-    console.log('l')
     if(this.firstElement == null) {
       this.firstElement = {element, done};
     } else {

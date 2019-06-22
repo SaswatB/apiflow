@@ -17,7 +17,7 @@ app.on("ready", () => {
   installExtension.default(installExtension.VUEJS_DEVTOOLS)
     .then(() => {})
     .catch((err:any) => {
-      console.log("Unable to install `vue-devtools`: \n", err)
+      console.warn("Unable to install `vue-devtools`: \n", err)
     })
 })
 

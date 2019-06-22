@@ -15,13 +15,12 @@
   declare var ResizeObserver: ResizeObserverType;
 
   import { FlowNodeType, FlowRootNodeId, FlowPlayNodeId, getFlowNodeTypeIcon, FlowNode, FlowDagNode } from "@/model/Flow"
-  import { hasPath, getTransformation, makeAbsoluteContext } from "@/utils/utils"
+  import { hasPath, makeAbsoluteContext } from "@/utils/utils"
 
   const nodeRadius = 30;
   const sideBarElementWidth = 60;
   const sideBarElementHeight = 60;
   const sideBarElementIconSize = 40;
-  const sideBarElementPadding = 5;
   const nodeIconSize = 40;
   const duration = 750; // default transition duration
   const fastDuration = 300;
@@ -248,7 +247,7 @@
         nodeEnter.attr("opacity", 1).attr("transform", nodeTransform)
       }
       
-      let nodeUpdate = nodes.transition()
+      nodes.transition()
         .duration(duration)
         .attr("transform", nodeTransform)
         .attr("opacity", 1); // there was an issue where adding multiple nodes quickly would leave some faded, this opacity set fixes that
@@ -386,7 +385,7 @@
 
       // panning at screen edge
       const edgeBuffer = 50; // how far from the edge before we start scrolling
-      let mousePos = d3.mouse(this.$el)
+      let mousePos = d3.mouse(this.$el as HTMLElement)
       if(mousePos[0] < edgeBuffer) this.scrollDx = mousePos[0] - edgeBuffer;
       else if(mousePos[0] > this.$el.clientWidth - edgeBuffer) this.scrollDx = mousePos[0] - this.$el.clientWidth + edgeBuffer;
       else this.scrollDx = 0;
@@ -397,7 +396,7 @@
       if((this.scrollDx != 0 || this.scrollDy != 0) && this.scrollTimer == undefined) {
         this.scrollTimer = setInterval(
           () => {(this.$refs.graphScroll as any).scrollBy({dx: this.scrollDx, dy: this.scrollDy})},
-          50);
+          50) as unknown as number;
       }
     }
     onEndNodeDrag(d: FlowDagNode, domNode: Element) {

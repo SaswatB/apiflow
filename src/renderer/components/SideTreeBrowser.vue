@@ -57,110 +57,107 @@
 </template>
 
 <script lang="ts">
-  import { mapActions, mapState } from "vuex"
-  import BlurredPopover from "@/components/standalone/BlurredPopover"
+  import { Vue, Component, Prop, Watch } from "vue-property-decorator"
+  import { getModule } from "vuex-module-decorators"
+  import { ElTree, TreeNode, TreeData } from "element-ui/types/tree";
+  import BlurredPopover from "@/components/standalone/BlurredPopover.vue"
+  import { Procedure } from "@/model/Procedure";
+  import Procedures from "@/store/modules/Procedures";
+import { ElInput } from "element-ui/types/input";
 
-  export default {
-    name: "SideTreeBrowser",
-    components: { BlurredPopover },
-    props: {
-      title: { type: String, required: true },
-      value: { type: Array, required: true },
-      itemName: { type: String, required: true },
-      itemIcon: { type: String, required: true }
-    },
-    data() {
-      return {
-        addItemName: "",
-        renameDialogVisible: false,
-        renameDialogNewName: "",
-        renameDialogData: {}
+  @Component({ components: { BlurredPopover } })
+  export default class SideTreeBrowser extends Vue {
+    @Prop(String) title!: string
+    @Prop(Array) value!: Procedure[]
+    @Prop(String) itemName!: string
+    @Prop(String) itemIcon!: string
+    ProceduresStore = getModule(Procedures, this.$store)
+    addItemName = ""
+    renameDialogVisible = false
+    renameDialogNewName = ""
+    renameDialogData?: TreeData
+
+    get openProcedure() { return this.ProceduresStore.openProcedure; }
+
+    setOpenProcedure(procedureId: Procedure["id"]) { this.ProceduresStore.setOpenProcedure(procedureId) }
+
+    @Watch("openProcedure")
+    handleOpenProcedureChange(procedure: Procedure) {
+      // if a different procedure has been selected in a different tree, clear our selected one
+      const currentKey = (this.$refs.tree as ElTree).getCurrentKey()
+      if(currentKey != null && currentKey != procedure) {
+        (this.$refs.tree as ElTree).setCurrentKey(null)
       }
-    },
-    computed: {
-      ...mapState({
-        openProcedure: state => state.procedures.openProcedure
-      })
-    },
-    watch: {
-      openProcedure(procedure) {
-        // if a different procedure has been selected in a different tree, clear our selected one
-        const currentKey = this.$refs.tree.getCurrentKey()
-        if(currentKey != null && currentKey != procedure) {
-          this.$refs.tree.setCurrentKey(null)
-        }
-      }
-    },
+    }
+
     mounted() {
       // if a procedure was recorded as open, reselect it
       for(let procedure of this.value) {
-        if(procedure.id == this.openProcedure) {
-          this.$emit("item-selected", procedure.id)
-          this.$refs.tree.setCurrentKey(procedure.id)
+        if(procedure.id === this.openProcedure) {
+          this.$emit("item-selected", procedure.id);
+          (this.$refs.tree as ElTree).setCurrentKey(procedure.id);
           break;
         }
       }
-    },
-    methods: {
-      ...mapActions(["setOpenProcedure"]),
-      allowDrag() {
-        return true;
-      },
-      allowDrop() { // TODO: allow folders
-        return false;
-      },
-      showAddItem(event) {
-        event.stopPropagation();
-        setTimeout(() => {this.$refs.addItemPopoverTextbox.focus()}, 150);
-      },
-      addItem() {
-        this.$emit("add-item", this.addItemName)
-        this.$refs.addItemPopover.hide();
-        // wait a bit before clearing so that the user doesn't see an empty text box
-        setTimeout(() => {this.addItemName = ""}, 300);
-      },
-      confirmRenameItem(data) {
-        this.$refs["editItemPopover_"+data.id].hide();
-        this.renameDialogVisible = true;
-        this.renameDialogNewName = data.label;
-        this.renameDialogData = data;
-        setTimeout(() => {this.$refs.renameDialogInput.focus()}, 150);
-      },
-      renameItemFromDialogInput() {
-        // TODO: do rename properly by sending an event to the parent
-        this.renameDialogData.label = this.renameDialogNewName;
+    }
 
-        this.renameDialogVisible = false;
-        this.renameDialogNewName = "";
-        this.renameDialogData = {};
-      },
-      confirmDeleteItem(data, node) {
-        this.$refs["editItemPopover_"+data.id].hide();
-        this.$confirm("Are you sure want to delete " + this.itemName + " '" + data.label + "'?", "", {
-            confirmButtonText: "OK",
-            cancelButtonText: "Cancel",
-            type: "warning"
-          })
-          .then(() => {this.deleteItem(data, node)})
-          .catch(() => {});
-      },
-      deleteItem(data, node) {
-        // TODO: do delete properly by sending an event to the parent
-        const parent = node.parent;
-        const children = parent.data.children || parent.data;
-        const index = children.findIndex(d => d.id === data.id);
-        children.splice(index, 1);
-      },
-      selectItem(id) {
-        this.$refs.tree.setCurrentKey(id)
-        this.itemSelected(id)
-      },
-      itemSelected(id) {
-        // when the user selects an item, save it and update the application's state
-        if(id != this.openProcedure) {
-          this.$emit("item-selected", id)
-          this.setOpenProcedure(id)
-        }
+    allowDrag() {
+      return true;
+    }
+    allowDrop() { // TODO: allow folders
+      return false;
+    }
+    showAddItem(event: MouseEvent) {
+      event.stopPropagation();
+      setTimeout(() => {(this.$refs.addItemPopoverTextbox as ElInput).focus()}, 150);
+    }
+    addItem() {
+      this.$emit("add-item", this.addItemName);
+      (this.$refs.addItemPopover as BlurredPopover).hide();
+      // wait a bit before clearing so that the user doesn't see an empty text box
+      setTimeout(() => {this.addItemName = ""}, 300);
+    }
+    confirmRenameItem(data: TreeData) {
+      (this.$refs["editItemPopover_"+data.id] as BlurredPopover).hide();
+      this.renameDialogVisible = true;
+      this.renameDialogNewName = data.label!;
+      this.renameDialogData = data;
+      setTimeout(() => {(this.$refs.renameDialogInput as ElInput).focus()}, 150);
+    }
+    renameItemFromDialogInput() {
+      // TODO: do rename properly by sending an event to the parent
+      this.renameDialogData!.label = this.renameDialogNewName;
+
+      this.renameDialogVisible = false;
+      this.renameDialogNewName = "";
+      this.renameDialogData = undefined;
+    }
+    confirmDeleteItem(data: TreeData, node: TreeNode<number, TreeData>) {
+      (this.$refs["editItemPopover_"+data.id] as BlurredPopover).hide();
+      this.$confirm("Are you sure want to delete " + this.itemName + " '" + data.label + "'?", "", {
+          confirmButtonText: "OK",
+          cancelButtonText: "Cancel",
+          type: "warning"
+        })
+        .then(() => {this.deleteItem(data, node)})
+        .catch(() => {});
+    }
+    deleteItem(data: TreeData, node: TreeNode<number, TreeData>) {
+      // TODO: do delete properly by sending an event to the parent
+      const parent = node.parent;
+      const children = parent!.data.children!;
+      const index = children.findIndex(d => d.id === data.id);
+      children.splice(index, 1);
+    }
+    selectItem(id: Procedure["id"]) {
+      (this.$refs.tree as ElTree).setCurrentKey(id)
+      this.itemSelected(id)
+    }
+    itemSelected(id: Procedure["id"]) {
+      // when the user selects an item, save it and update the application's state
+      if(id != this.openProcedure) {
+        this.$emit("item-selected", id)
+        this.setOpenProcedure(id)
       }
     }
   }

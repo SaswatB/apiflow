@@ -1,7 +1,6 @@
 import { v4 as uuidv4 } from "uuid"
 
 export interface Procedure {
-  [index: string]: any
   id: string
   name: string
 }

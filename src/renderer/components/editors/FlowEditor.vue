@@ -363,7 +363,6 @@
     linkedValueEditorInit(editor: any) {
       let customCompleters = [{
         getCompletions: (editor: any, session: any, pos: any, prefix: any, callback: any) => {
-          console.log(session)
           // get the index of the token before the cursor
           let idStart = pos.column - prefix.length;
           let idIndex = undefined;
@@ -436,7 +435,6 @@
       }
       this.flowRunner = new FlowRunner(this.value, this.ctx);
       this.flowRunner.run().catch((err) => {
-        console.log("err", err)
         let message;
         if(err instanceof Error) {
           if(err.message) {
@@ -450,7 +448,6 @@
 
         this.$notify.error({title: "Error occured while running flow", message});
       });
-      console.log("runner", this.flowRunner);
       this.activePropEditor = "results";
     }
 

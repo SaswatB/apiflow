@@ -97,7 +97,7 @@
     "@types/webpack-env": "^1.13.6",
     "chai": "^4.1.2",
     "devtron": "^1.4.0",
-    "electron": "^5.0.3",
+    "electron": "^5.0.5",
     "electron-builder": "^20.19.2",
     "electron-devtools-installer": "^2.2.4",
     "electron-webpack": "^2.6.2",

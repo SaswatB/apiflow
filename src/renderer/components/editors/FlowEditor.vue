@@ -484,7 +484,7 @@
       #tab-results {
         transition: border-bottom .5s ease-in-out;
         &:not(:last-child) {
-          border-bottom: 1px solid rgba(255, 255, 255, .4)
+          border-bottom: 1px solid rgba(255, 255, 255, .25)
         }
       }
 

@@ -92,23 +92,24 @@ export default class MorphingCollapse extends Vue {
     } catch(e){
       console.error('ramjet error', e)
     }
-    //show the entering element
+    //show the entering element to get a height reading and start the transform
     toElement.style.display = "";
     //animate the collapse content container by explictly measuring and setting the height
     content.style.height = (parseInt(content.style.height!.replace("px", ""), 10) - parseInt(fromPosition.height.replace("px", ""), 10) + to.element.getBoundingClientRect().height) + "px";
-    //force the entering element to appear in the same location as the leaving element
-    const oldToStyle = toElement.style;
-    Object.assign(toElement.style, fromPosition);
+    
     //transform from our clone to the entering element
     ramjet.transform(clone, toElement, { duration: 150, done(){
       //show the final entering element, with its original style
+      toElement.style.display = "";
       to.done();
-      Object.assign(toElement.style, oldToStyle);
       ramjet.show(toElement);
       //cleanup
       fromParent.removeChild(clone);
       content.style.height = "";
     }});
+
+    // hide the entering element so that it doesn't interfere with the transform
+    toElement.style.display = "none";
   }
   render(h: Function) {
     // TODO revert to jsx when that's properly supported for vue/typescript

@@ -73,6 +73,7 @@ export default class MorphingCollapse extends Vue {
       return;
     }
     const content = this.getContentElement() as HTMLElement;
+    const toElement = to.element as HTMLElement;
     //clone the leaving element with absolute positioning
     let fromParent = from.element.parentElement as HTMLElement;
     let clone = from.element.cloneNode(true) as HTMLElement;
@@ -83,17 +84,28 @@ export default class MorphingCollapse extends Vue {
     Object.assign(clone.style, fromPosition);
     fromParent.appendChild(clone);
     //have vue remove the original element
+    (from.element as HTMLElement).style.display = "none";
     from.done();
-    ramjet.hide(clone)
-    ramjet.hide(to.element)
+    try {
+      ramjet.hide(clone);
+      ramjet.hide(toElement);
+    } catch(e){
+      console.error('ramjet error', e)
+    }
     //show the entering element
-    (to.element as HTMLElement).style.display = "";
-    //animate the collapse content container
+    toElement.style.display = "";
+    //animate the collapse content container by explictly measuring and setting the height
     content.style.height = (parseInt(content.style.height!.replace("px", ""), 10) - parseInt(fromPosition.height.replace("px", ""), 10) + to.element.getBoundingClientRect().height) + "px";
+    //force the entering element to appear in the same location as the leaving element
+    const oldToStyle = toElement.style;
+    Object.assign(toElement.style, fromPosition);
     //transform from our clone to the entering element
-    ramjet.transform(clone, to.element, { duration: 150, done(){
+    ramjet.transform(clone, toElement, { duration: 150, done(){
+      //show the final entering element, with its original style
       to.done();
-      ramjet.show(to.element);
+      Object.assign(toElement.style, oldToStyle);
+      ramjet.show(toElement);
+      //cleanup
       fromParent.removeChild(clone);
       content.style.height = "";
     }});
@@ -108,7 +120,8 @@ export default class MorphingCollapse extends Vue {
       //   </transition>
       // );
       subSlots.push(
-        h('transition', {on: {'before-enter': this.beforeEnter, enter: this.enter, leave: this.leave}}, this.$slots["subSlot"+i])
+        h('transition', {on: {'before-enter': this.beforeEnter, enter: this.enter, leave: this.leave}},
+          [ this.$slots["subSlot"+i] ])
       )
     }
 
@@ -123,11 +136,13 @@ export default class MorphingCollapse extends Vue {
     //     { subSlots }
     //   </el-collapse-item>
     // );
-    return h("el-collapse-item", {props: {name: this.collapseItemName }, attrs: {class: "morphing-collapse"}},
-      [
-        h('div', {attrs: {class: 'tree-title'}, slot: 'title' }, [ this.collapseItemName, this.$slots.select ]),
-        ...subSlots,
-      ]
-    )
+    return h("div", {attrs: {class: "morphing-collapse"}}, [
+      h("el-collapse-item", {props: {name: this.collapseItemName }},
+        [
+          h('div', {attrs: {class: 'tree-title'}, slot: 'title' }, [ this.collapseItemName, this.$slots.select ]),
+          ...subSlots,
+        ]
+      )
+    ]);
   }
 }

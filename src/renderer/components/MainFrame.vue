@@ -173,11 +173,6 @@
         right: 0;
       }
     }
-
-    .gutter {
-      background-image: unset;
-      background-color: unset;
-    }
   }
   .fade-enter-active, .fade-leave-active {
     transition: opacity .3s;

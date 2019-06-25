@@ -1,6 +1,6 @@
 <template>
   <div class="request-pane">
-    <Split :gutter-size="20">
+    <Split :gutter-size="12">
       <!-- TODO: limit and persist split -->
       <SplitArea :size="50">
         <vue-scroll :ops="{ scrollPanel: { scrollingX: false } }">
@@ -280,7 +280,6 @@
     }
 
     .gutter {
-      width: 20px !important;
       border-left: 1px solid rgba(255, 255, 255, .2);
     }
 

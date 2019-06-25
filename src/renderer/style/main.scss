@@ -77,3 +77,8 @@ body {
     transition: height 150ms linear;
     position: relative;
 }
+
+.gutter {
+  background-image: unset !important;
+  background-color: unset !important;
+}

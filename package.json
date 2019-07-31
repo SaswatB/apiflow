@@ -96,6 +96,7 @@
     "@types/uuid": "^3.4.4",
     "@types/validator": "^10.11.1",
     "@types/webpack-env": "^1.13.6",
+    "@typescript-eslint/parser": "^1.13.0",
     "chai": "^4.1.2",
     "devtron": "^1.4.0",
     "electron": "^6.0.0",

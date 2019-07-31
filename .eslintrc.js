@@ -1,7 +1,7 @@
 module.exports = {
   root: true,
   parserOptions: {
-    parser: "typescript-eslint-parser",
+    parser: "@typescript-eslint/parser",
     sourceType: "module",
     ecmaFeatures: {
       legacyDecorators: true,

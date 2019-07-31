@@ -58,7 +58,7 @@
   import { ProcedureRootFolderName } from "@/model/Procedure"
   import { Flow, FlowContext } from "@/model/Flow"
   import { Request } from "@/model/Request"
-  import Procedures from "@/store/modules/Procedures" // TODO: fix reference to use @
+  import Procedures from "@/store/modules/Procedures"
   import Counter from "@/store/modules/Counter"
   import { mapToTree } from "@/utils/utils"
 

@@ -71,7 +71,6 @@
       left: 0;
       right: 0;
       padding: 15px;
-      // TODO: update to electron 6 when it's stable to fix backdrop-filter
       backdrop-filter: blur(3px);
       background-color: #000a1277;
       color: white;

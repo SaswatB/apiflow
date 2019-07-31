@@ -111,6 +111,8 @@
   import StoredLinkedInput from "@/components/StoredLinkedInput.vue"
   import MorphingCollapse from "@/components/standalone/MorphingCollapse.tsx"
 
+  import { sendRequest } from "@/utils/requestUtils"
+
   @Component({ components: { AceEditor, StoredLinkedInput, MorphingCollapse } })
   export default class RequestEditor extends Vue {
     @Prop(Object) value!: Request
@@ -244,11 +246,12 @@
       linkedValueIds.push(this.value.authToken);
 
       // send the request, with the resolved linked values
-      this.value.sendRequest(this.constructLinkedValuesMap(linkedValueIds)).then((response) => {
-        this.value.response = response
-      }).catch((error) => {
-        this.value.response = error
-      });
+      sendRequest(this.value, this.constructLinkedValuesMap(linkedValueIds))
+        .then((response) => {
+          this.value.response = response
+        }).catch((error) => {
+          this.value.response = error
+        });
     }
 
     /**

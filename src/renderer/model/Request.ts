@@ -1,7 +1,5 @@
-import { Procedure, newLinkedValueId, ProcedureMap } from "./Procedure"
 import { cloneDeep } from "lodash";
-import axios from "axios"
-import { VM } from 'vm2';
+import { Procedure, newLinkedValueId, ProcedureMap } from "./Procedure"
 
 export enum RequestMethod {
   Get = "GET",
@@ -68,47 +66,5 @@ export class Request implements Procedure {
     const req = Request.placeholder();
     Object.assign(req, obj);
     return req;
-  }
-
-  sendRequest(linkedValueData: {[index: string]: string}, sandbox: object = {}) {
-    const vm = new VM({
-        timeout: 1000,
-        sandbox
-    });
-
-    if(this.method === undefined) {
-      return Promise.reject("Method not provided");
-    }
-    if(this.url === undefined) {
-      return Promise.reject("URL not provided");
-    }
-    let args:any = { method: this.method, url: this.url, headers: {} }
-    if(this.payloadType === RequestPayloadType.JSON) {
-      try {
-        args.data = JSON.parse(this.jsonPayload)
-      } catch(err) {
-        return Promise.reject("Invalid JSON Payload (" + (err.message || "Unknown Error") + ")");
-      }
-    }
-    for(let header of this.headers) {
-      const nameLink = vm.run(linkedValueData[header.name])
-      const valueLink = vm.run(linkedValueData[header.value])
-      if(nameLink !== undefined && valueLink !== undefined) {
-        args.headers[nameLink] = valueLink
-      }
-    }
-    if(this.authType === RequestAuthenticationType.Basic) {
-      const usernameLink = vm.run(linkedValueData[this.authSimpleUsername])
-      const passwordLink = vm.run(linkedValueData[this.authSimplePassword])
-      if(usernameLink !== undefined && passwordLink !== undefined) {
-        args.headers["Authorization"] = "Basic " + btoa(usernameLink + ":" + passwordLink);
-      }
-    } else if(this.authType === RequestAuthenticationType.Bearer) {
-      const tokenLink = vm.run(linkedValueData[this.authToken])
-      if(tokenLink !== undefined) {
-        args.headers["Authorization"] = "Bearer " + tokenLink;
-      }
-    }
-    return axios(args);
   }
 }

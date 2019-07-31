@@ -1,13 +1,13 @@
-$--input-fill: unset;
-$--input-color: $--text-color;
+$--input-background-color: unset;
+$--input-font-color: $--text-font-color;
 // $--input-border: unset;
 $--background-color-base: unset;
-$--input-disabled-fill: unset;
-$--input-disabled-color: $--text-color;
+$--input-disabled-background-color: unset;
+$--input-disabled-font-color: $--text-font-color;
 // $--border-base: unset;
 $--input-border-radius: unset;
-$--button-hover-fill: $--color-hover;
-$--button-disabled-fill: $--disabled-fill;
+$--button-hover-background-color: $--color-hover;
+$--button-disabled-background-color: $--disabled-background-color;
 @import "element-ui/packages/theme-chalk/src/input.scss";
 
 @include b(input) {
@@ -27,13 +27,13 @@ $--button-disabled-fill: $--disabled-fill;
         button.el-button,
         div.el-select .el-input__inner,
         div.el-select:hover .el-input__inner {
-            color: $--input-color;
+            color: $--input-font-color;
         }
         .el-button:hover {
-            background-color: $--button-hover-fill;
+            background-color: $--button-hover-background-color;
 
             @include when(disabled) {
-                background-color: $--button-disabled-fill;
+                background-color: $--button-disabled-background-color;
             }
         }
     }

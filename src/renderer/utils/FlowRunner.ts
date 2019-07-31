@@ -4,6 +4,7 @@ import * as d3dag from "d3-dag"
 import { FlowNodeType, FlowPlayNodeId, FlowDagNode, FlowNodeRequestSettings, FlowContext, Flow } from "@/model/Flow"
 import { Request } from "@/model/Request"
 import Vue from "vue";
+import { sendRequest } from "./requestUtils";
 
 export enum FlowRunnerLogLevel {
   VERBOSE, INFORMATION, WARNING, ERROR
@@ -26,25 +27,20 @@ function nodeNamePrint(nodeType: FlowNodeType, nodeName?: string) {
 }
 
 export class FlowRunner {
-  flow: Flow;
-  ctx: FlowContext;
-  dagRoot: FlowDagNode;
+  private dagRoot: FlowDagNode;
+  private log: Array<FlowRunnerLogEntry> = [];
+  // map between a node and an array of its results (one entry for every time its executed in this run)
+  private results: {[index:string]: Array<any>} = {}
 
-  log: Array<FlowRunnerLogEntry> = [];
-  results: {[index:string]: Array<any>} = {} // map between a node and an array of its results (one entry for every time its executed in this run)
-
-  constructor(flow: Flow, ctx: FlowContext) {
-    this.flow = flow;
-    this.ctx = ctx;
-
+  public constructor(private flow: Flow, private ctx: FlowContext) {
     this.dagRoot = d3dag.dratify()(flow.nodes);
   }
 
-  static placeholder() {
+  public static placeholder() {
     return new FlowRunner(Flow.placeholder(), {flows:{}, requests:{}, linkedValues: {}});
   }
 
-  run(): Promise<any> {
+  public run(): Promise<any> {
     this.addLog(FlowRunnerLogLevel.VERBOSE, "Validating Nodes");
     // get the play node
     let playNode: (FlowDagNode | undefined) = undefined;
@@ -57,12 +53,12 @@ export class FlowRunner {
     if(playNode == undefined) {
       this.addLog(FlowRunnerLogLevel.ERROR, "Play Node Missing");
       this.addLog(FlowRunnerLogLevel.ERROR, "Validation Failed");
-      return Promise.reject("Validation failed");
+      return Promise.reject(new Error("Validation failed"));
     }
     // validate all the nodes from the play node
     if(!this.validateNode(playNode)) {
       this.addLog(FlowRunnerLogLevel.ERROR, "Validation Failed");
-      return Promise.reject("Validation failed");
+      return Promise.reject(new Error("Validation failed"));
     }
     // run the flow, starting from the play node
     this.addLog(FlowRunnerLogLevel.INFORMATION, "Running Flow");
@@ -71,7 +67,7 @@ export class FlowRunner {
     });
   }
 
-  validateNode(node: FlowDagNode) {
+  private validateNode(node: FlowDagNode) {
     let nodeSettings = this.flow.nodeSettingsMap[node.id] || {};
     let valid = true;
 
@@ -108,7 +104,7 @@ export class FlowRunner {
     return valid;
   }
 
-  runNode(node: FlowDagNode, context: object = {}) {
+  private runNode(node: FlowDagNode, context: object = {}) {
     let nodeSettings = this.flow.nodeSettingsMap[node.id] || {};
 
     this.addLog(FlowRunnerLogLevel.VERBOSE, "Running " + nodeNamePrint(node.data.type, nodeSettings.name), node.id, FlowRunnerLogEntryTargetPane.LogViewer);
@@ -128,11 +124,9 @@ export class FlowRunner {
           // save the result data
           this.addNodeResult(node.id, data);
           return Promise.resolve(data);
-        }).catch((err) => {
-          if(typeof err === "object") {
-            // save the error as the result
-            this.addNodeResult(node.id, err);
-          }
+        }).catch((err: Error) => {
+          // save the error as the result
+          this.addNodeResult(node.id, err);
           return Promise.reject(err);
         });
         break;
@@ -141,8 +135,8 @@ export class FlowRunner {
     }
 
     //log if the promise fails, then propagate that failure
-    execPromise = execPromise.catch((err) => {
-      this.addLog(FlowRunnerLogLevel.ERROR, nodeNamePrint(node.data.type, nodeSettings.name) + " request failed, " + err, node.id, FlowRunnerLogEntryTargetPane.LogViewer);
+    execPromise = execPromise.catch((err: Error) => {
+      this.addLog(FlowRunnerLogLevel.ERROR, nodeNamePrint(node.data.type, nodeSettings.name) + " request failed, " + err.message, node.id, FlowRunnerLogEntryTargetPane.LogViewer);
       return Promise.reject(err);
     })
 
@@ -160,18 +154,18 @@ export class FlowRunner {
     return execPromise;
   }
 
-  runRequestNode(node: FlowDagNode, context: object) {
+  private runRequestNode(node: FlowDagNode, context: object) {
     let nodeSettings = this.flow.nodeSettingsMap[node.id] || {};
     let request = Request.getFromStore(this.ctx.requests, (nodeSettings as FlowNodeRequestSettings).requestId!);
 
-    return request.sendRequest(nodeSettings.linkedValueData || {}, context);
+    return sendRequest(request, nodeSettings.linkedValueData || {}, context);
   }
 
-  addLog(level: FlowRunnerLogLevel, entry: string, nodeId?: string, targetPane?: FlowRunnerLogEntryTargetPane) {
+  private addLog(level: FlowRunnerLogLevel, entry: string, nodeId?: string, targetPane?: FlowRunnerLogEntryTargetPane) {
     this.log.push({time: Date.now(), level, entry, nodeId, targetPane});
   }
 
-  addNodeResult(nodeId: string, result: any) {
+  private addNodeResult(nodeId: string, result: any) {
     if(this.results[nodeId] === undefined) {
       Vue.set(this.results, nodeId, []); // required by Vue for proper reactive changes
     }

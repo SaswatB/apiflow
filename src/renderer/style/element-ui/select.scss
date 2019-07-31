@@ -1,11 +1,11 @@
 $--select-input-color: unset;
-$--select-hover-fill: $--color-hover;
+$--select-hover-background-color: $--color-hover;
 @import "element-ui/packages/theme-chalk/src/select.scss";
 
 @include b(select) {
     transition: background-color 150ms linear;
 
     &:hover {
-        background-color: $--select-hover-fill;
+        background-color: $--select-hover-background-color;
     }
 }

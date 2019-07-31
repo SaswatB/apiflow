@@ -1,8 +1,8 @@
-$--collapse-header-fill: unset;
-$--collapse-header-color: unset;
-$--collapse-header-hover-fill: $--color-hover; //TODO: make a var
-$--collapse-content-fill: unset;
-$--collapse-content-color: unset;
+$--collapse-header-background-color: unset;
+$--collapse-header-font-color: unset;
+$--collapse-header-hover-background-color: $--color-hover;
+$--collapse-content-background-color: unset;
+$--collapse-content-font-color: unset;
 $--collapse-border-color: rgba(255, 255, 255, .4);
 @import "element-ui/packages/theme-chalk/src/collapse.scss";
 
@@ -16,7 +16,7 @@ $--collapse-border-color: rgba(255, 255, 255, .4);
     transition: border-bottom-color 1ms linear 330ms, background-color 150ms linear;
     font-size: 15px;
     &:hover {
-      background-color: $--collapse-header-hover-fill;
+      background-color: $--collapse-header-hover-background-color;
     }
     @include when(active) {
       transition: border-bottom-color 1ms linear, background-color 150ms linear;

@@ -1,7 +1,7 @@
-$--button-default-color: $--text-color;
-$--button-default-fill: unset;//rgba(0, 0, 0, .1);
-$--button-hover-fill: $--color-hover;
-$--button-disabled-fill: $--disabled-fill;
+$--button-default-font-color: $--text-font-color;
+$--button-default-background-color: unset;
+$--button-hover-background-color: $--color-hover;
+$--button-disabled-background-color: $--disabled-background-color;
 @import "element-ui/packages/theme-chalk/src/button.scss";
 
 @include b(button)  {
@@ -11,12 +11,12 @@ $--button-disabled-fill: $--disabled-fill;
 
     &:hover, &:focus {
         border-color: white;
-        color: $--button-default-color;
-        background-color: $--button-hover-fill;
-        text-shadow: $--button-default-color 0 0 10px;
+        color: $--button-default-font-color;
+        background-color: $--button-hover-background-color;
+        text-shadow: $--button-default-font-color 0 0 10px;
     }
 
     @include when(disabled) {
-        background-color: $--button-default-fill;
+        background-color: $--button-default-background-color;
     }
 }

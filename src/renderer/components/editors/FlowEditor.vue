@@ -189,7 +189,7 @@
   import { Vue, Component, Prop, Watch } from "vue-property-decorator"
   import AceEditor from "vue2-ace-editor"
   import isURL from "validator/lib/isURL"
-  const beautify = require("js-beautify").js
+  import { js as beautify } from "js-beautify"
 
   import { FlowNodeType, FlowPlayNodeId, FlowNodeRequestSettings, FlowNodeSleepSettings, FlowContext, Flow } from "@/model/Flow"
   import { FlowRunnerLogLevel, FlowRunnerLogEntryTargetPane, FlowRunnerLogEntry, FlowRunner } from "@/utils/FlowRunner"
@@ -251,7 +251,7 @@
     get nodeSettingsRequest() { return this.ctx.requests[(this.nodeSettings as FlowNodeRequestSettings).requestId!]; }
     get nodeSettingsLinkedValues() {
       let links = [];
-      let props = dumpObjectStrings(this.nodeSettingsRequest, ["response", "jsonPayload"]);
+      let props = dumpObjectStrings(this.nodeSettingsRequest, ["response", "body"]);
       for(let prop of props) {
         if(this.ctx.linkedValues[prop] !== undefined && this.ctx.linkedValues[prop].linked) {
           links.push(this.ctx.linkedValues[prop])

@@ -119,3 +119,20 @@ export function mapToTree(map: ProcedureMap, folders:ProcedureFolderMap, folderN
 export function onRenderer(params:object) {
   return (process && process.type === 'renderer') ? params : {};
 }
+
+/**
+ * Pulses the background color of the given element
+ * @param element the element to pulse
+ */
+export function pulse(element: HTMLElement) {
+  element.setAttribute('data-pulse', `${parseInt(element.getAttribute('data-pulse') || '0', 10) % 3 + 1}`);
+}
+
+/**
+ * Returns `value` if it is a member of `enumType`, otherwise returns undefined
+ * @param enumType the enum to search against
+ * @param value the value to find within enumType
+ */
+export function parseString<T>(enumType: T, value: string): T[keyof T] | undefined {
+  return Object.values(enumType).find((e) => e === value);
+}

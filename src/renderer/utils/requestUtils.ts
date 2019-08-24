@@ -1,7 +1,7 @@
 import promiseIpc from 'electron-promise-ipc';
 import { VM } from 'vm2';
 import { SendCurlRequest } from '@/sendCurl';
-import { RequestPayloadType, Request, RequestAuthenticationType } from '@/model/Request';
+import { RequestBodyType, Request, RequestAuthenticationType } from '@/model/Request';
 
 export function sendRequest(request: Request, linkedValueData: { [index: string]: string }, sandbox: object = {}) {
   // use a sandboxed environment to run user provided (or default) expressions
@@ -21,12 +21,25 @@ export function sendRequest(request: Request, linkedValueData: { [index: string]
   const headers: {[index: string]: string} = {};
 
   // add the body if a payload type if set
-  if (request.payloadType === RequestPayloadType.JSON) {
+  if (request.bodyType !== RequestBodyType.None) {
     try {
-      args.body = JSON.parse(request.jsonPayload);
-      headers["Content-Type"] = "application/json";
+      switch(request.bodyType) {
+        case RequestBodyType.JSON:
+          headers["Content-Type"] =  "application/json";
+          args.body = JSON.parse(request.body);
+          break;
+        case RequestBodyType.Form:
+          headers["Content-Type"] =  "application/x-www-form-urlencoded";
+          args.body = request.body;
+          break
+        case RequestBodyType.Raw:
+        default:
+          headers["Content-Type"] =  "text/plain";
+          args.body = request.body;
+          break;
+      }
     } catch (err) {
-      return Promise.reject(new Error("Invalid JSON Payload (" + (err.message || "Unknown Error") + ")"));
+      return Promise.reject(new Error(`Invalid JSON Payload (${err.message || "Unknown Error"})`));
     }
   }
 

@@ -950,6 +950,11 @@
     "@types/minimatch" "*"
     "@types/node" "*"
 
+"@types/js-beautify@^1.8.1":
+  version "1.8.1"
+  resolved "https://registry.yarnpkg.com/@types/js-beautify/-/js-beautify-1.8.1.tgz#c210b3206bece04dc240b1deeec185f7b5b03534"
+  integrity sha512-B1Br8yE27obcYvFx5ECZswT/947aAFNb9lHqnkUOhtOfvJqaa6Axibo4T+5G6iQlUfjgSd8am9R/9j9UBfRlrw==
+
 "@types/json-schema@^7.0.3":
   version "7.0.3"
   resolved "https://registry.yarnpkg.com/@types/json-schema/-/json-schema-7.0.3.tgz#bdfd69d61e464dcc81b25159c270d75a73c1a636"
@@ -7736,6 +7741,13 @@ parse-color@^1.0.0:
   dependencies:
     color-convert "~0.5.0"
 
+parse-curl@^0.2.6:
+  version "0.2.6"
+  resolved "https://registry.yarnpkg.com/parse-curl/-/parse-curl-0.2.6.tgz#bf755ae6b572de2745daf6b98af144dff32d225b"
+  integrity sha512-ENhXeIxG4A6wFvYSU87b0o3Tp6U+Wup069GYhXCn0ZP/E7evfvomTSM/MeEOs3QTyuye+u2r7fFRj6nX0q9kQA==
+  dependencies:
+    shellwords "^0.1.0"
+
 parse-json@^2.2.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/parse-json/-/parse-json-2.2.0.tgz#f480f40434ef80741f8469099f8dea18f55a4dc9"
@@ -9235,6 +9247,11 @@ shebang-regex@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/shebang-regex/-/shebang-regex-1.0.0.tgz#da42f49740c0b42db2ca9728571cb190c98efea3"
   integrity sha1-2kL0l0DAtC2yypcoVxyxkMmO/qM=
+
+shellwords@^0.1.0:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/shellwords/-/shellwords-0.1.1.tgz#d6b9181c1a48d397324c84871efbcfc73fc0654b"
+  integrity sha512-vFwSUfQvqybiICwZY5+DAWIPLKsWO31Q91JSKl3UYv+K5c2QRPzn0qzec6QPu1Qc9eHYItiP3NdJqNVqetYAww==
 
 sigmund@^1.0.1:
   version "1.0.1"

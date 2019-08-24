@@ -82,3 +82,16 @@ body {
   background-image: unset !important;
   background-color: unset !important;
 }
+
+// Pulse animation
+$--pulse-color: rgba(28, 135, 229, .5);
+$--pulse-res: 3;
+@for $i from 1 through $--pulse-res {
+    [data-pulse="#{$i}"] {
+        animation: pulse-animation-#{$i} 500ms linear running, pulse-animation-#{($i - 1) % $--pulse-res} 500ms linear paused
+    }
+
+    @keyframes pulse-animation-#{$i} {
+        20%  { background-color: $--pulse-color; }
+    }
+}

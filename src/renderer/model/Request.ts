@@ -12,13 +12,15 @@ export enum RequestAuthenticationType {
   Bearer = "Bearer"
 }
 
-export enum RequestPayloadType {
+export enum RequestBodyType {
   None = "None",
-  JSON = "JSON"
+  Raw = "Raw",
+  Form = "Form",
+  JSON = "JSON",
 }
 
-export function getPayloadTypes(method: RequestMethod) {
-  return [RequestPayloadType.None, ...(method == RequestMethod.Post ? [RequestPayloadType.JSON] : [])];
+export function getBodyTypes(method: RequestMethod) {
+  return [RequestBodyType.None, ...(method == RequestMethod.Post ? [RequestBodyType.Raw, RequestBodyType.Form, RequestBodyType.JSON] : [])];
 }
 
 //stub used to distinguish migrated and unmigrated objects
@@ -38,8 +40,8 @@ export class Request implements Procedure {
   //headers
   headers:Array<{key: number, name: string, value: string}> = []//name: ProcedureLinkedValue, value: authSimpleUsername
   //payload
-  payloadType = RequestPayloadType.None
-  jsonPayload = "" //ace editor doesn't like undefined
+  bodyType = RequestBodyType.None
+  body = "" //ace editor doesn't like undefined
   response = {}
 
   private constructor(id:string, name: string, authSimpleUsername: string, authSimplePassword: string, authToken: string) {

@@ -4,7 +4,7 @@
       <!-- TODO: limit and persist split -->
       <SplitArea :size="50">
         <vue-scroll :ops="{ scrollPanel: { scrollingX: false } }">
-          <div class="request-bar">
+          <div ref="requestBar" class="request-bar">
             <el-input v-model="value.url" placeholder="URL" required>
               <el-select slot="prepend" v-model="value.method" placeholder="Method">
                 <el-option v-for="item in methodOptions" :key="item" :label="item" :value="item"/>
@@ -14,7 +14,7 @@
           </div>
           <el-collapse v-model="activeForms" class="request-form">
             <!-- Authentication Form -->
-            <MorphingCollapse :sub-item-count="3" :collapse-item-name="authFormName">
+            <MorphingCollapse ref="authForm" :sub-item-count="3" :collapse-item-name="authFormName">
               <template slot="select">
                 <el-select v-model="value.authType" :class="authenticationTypeIsNone ? 'none' : ''" placeholder="Type" @change="autoOpenAuthenticationPane">
                   <el-option v-for="item in authenticationOptions" :key="item" :label="item" :value="item"/>
@@ -40,7 +40,7 @@
               </template>
             </MorphingCollapse>
             <!-- Headers Form -->
-            <el-collapse-item :name="headersFormName" :title="headersFormName" class="header-form">
+            <el-collapse-item ref="headerForm" :name="headersFormName" :title="headersFormName" class="header-form">
               <div v-for="header in value.headers" :key="header.key" class="header-form-row">
                 <el-form :inline="true" @submit.prevent="">
                   <StoredLinkedInput :link-id="header.name" :link-name="'Header ' + header.key + ' Name'" field-name="Name" required/>
@@ -51,20 +51,34 @@
               <el-button class="add-btn" @click="addHeader"><i class="mdi mdi-plus"/></el-button>
             </el-collapse-item>
             <!-- Payload Form -->
-            <MorphingCollapse :sub-item-count="3" :collapse-item-name="payloadFormName">
+            <MorphingCollapse ref="payloadForm" :sub-item-count="5" :collapse-item-name="payloadFormName">
               <template slot="select">
-                <el-select v-model="value.payloadType" :class="payloadTypeIsNone ? 'none' : ''" placeholder="Type">
+                <el-select v-model="value.bodyType" :class="bodyTypeIsNone ? 'none' : ''" placeholder="Type">
                   <el-option v-for="item in payloadOptions" :key="item" :label="item" :value="item"/>
                 </el-select>
               </template>
               <template slot="subSlot1">
-                <div v-if="payloadTypeIsNone" class="muted">No Payload Type Selected</div>
+                <div v-if="bodyTypeIsNone" class="muted">No Body Type Selected</div>
               </template>
               <template slot="subSlot2">
-                <div v-if="payloadTypeIsJSON">
+                <div v-if="bodyTypeIsRaw">
+                  <textarea 
+                    v-model="value.body"
+                    class="body-editor"/>
+                </div>
+              </template>
+              <template slot="subSlot3">
+                <div v-if="bodyTypeIsForm">
+                  <textarea 
+                    v-model="value.body"
+                    class="body-editor"/>
+                </div>
+              </template>
+              <template slot="subSlot4">
+                <div v-if="bodyTypeIsJSON">
                   <AceEditor
                     ref="jsonPayloadEditor"
-                    v-model="value.jsonPayload"
+                    v-model="value.body"
                     lang="javascript"
                     theme="merbivore_soft"
                     width="100%"
@@ -95,23 +109,25 @@
   import AceEditor from "vue2-ace-editor"
   import isURL from "validator/lib/isURL"
   import isJSON from "validator/lib/isJSON"
-  const difference = require("lodash/difference")
-  const beautify = require("js-beautify").js
+  import difference from "lodash/difference"
+  import { js as beautify } from "js-beautify"
+  import parseCurl from "parse-curl"
 
-  require("brace");
+  import "brace"
   import "brace/ext/language_tools"
   import "brace/mode/javascript"
   import "brace/theme/merbivore_soft"
   import "brace/snippets/javascript"
 
   import {  newLinkedValueId } from "@/model/Procedure"
-  import { RequestMethod, RequestAuthenticationType, RequestPayloadType, getPayloadTypes, Request } from "@/model/Request"
+  import { RequestMethod, RequestAuthenticationType, RequestBodyType, getBodyTypes, Request } from "@/model/Request"
   import Procedures from "@/store/modules/Procedures"
 
   import StoredLinkedInput from "@/components/StoredLinkedInput.vue"
   import MorphingCollapse from "@/components/standalone/MorphingCollapse.tsx"
 
   import { sendRequest } from "@/utils/requestUtils"
+  import { pulse, parseString } from "../../utils/utils";
 
   @Component({ components: { AceEditor, StoredLinkedInput, MorphingCollapse } })
   export default class RequestEditor extends Vue {
@@ -141,9 +157,11 @@
     get authenticationTypeIsToken() { return this.value.authType === RequestAuthenticationType.Bearer }
     get authenticationOptions() { return Object.keys(RequestAuthenticationType).map(k => RequestAuthenticationType[k as any]); }
 
-    get payloadTypeIsNone() { return this.value.payloadType === RequestPayloadType.None }
-    get payloadTypeIsJSON() { return this.value.payloadType === RequestPayloadType.JSON }
-    get payloadOptions() { return this.method != undefined ? getPayloadTypes(this.method) : [RequestPayloadType.None]; }
+    get bodyTypeIsNone() { return this.value.bodyType === RequestBodyType.None }
+    get bodyTypeIsRaw() { return this.value.bodyType === RequestBodyType.Raw }
+    get bodyTypeIsForm() { return this.value.bodyType === RequestBodyType.Form }
+    get bodyTypeIsJSON() { return this.value.bodyType === RequestBodyType.JSON }
+    get payloadOptions() { return this.method != undefined ? getBodyTypes(this.method) : [RequestBodyType.None]; }
 
     get prettyResponse() { return beautify(JSON.stringify(this.value.response)) }
     set prettyResponse(ignored) {}
@@ -158,7 +176,7 @@
     handleMethodChanged() { 
       // reset payload type if its not supported for the set method
       if(this.method !== RequestMethod.Post) {
-        this.value.payloadType = RequestPayloadType.None;
+        this.value.bodyType = RequestBodyType.None;
       }
     }
 
@@ -167,23 +185,46 @@
       let diff = difference(newVal, oldVal);
       if(diff.length == 1) {
         // auto focus the json editor if its collapse pane was opened
-        if(diff[0] == this.payloadFormName && this.payloadTypeIsJSON) {
+        if(diff[0] == this.payloadFormName && this.bodyTypeIsJSON) {
           (this.$refs.jsonPayloadEditor as any).editor.focus();
         }
       }
     }
 
-    @Watch("value")
-    async handleValueChanged() {
-      // if(this.transitionClone == undefined) return;
-      // let element = (this.transitionClone as HTMLElement);
-      // this.transitionClone = undefined;
-      // //push away the clone
-      // element.style.animation = "push-right 500ms 1 forwards cubic-bezier(.5,0,1,.5)";
-      // //remove the clone after the animation
-      // setTimeout(() => {
-      //   this.$el.parentElement!.removeChild(element);
-      // }, 750);
+    // @Watch("value")
+    // async handleValueChanged() {
+    //   // if(this.transitionClone == undefined) return;
+    //   // let element = (this.transitionClone as HTMLElement);
+    //   // this.transitionClone = undefined;
+    //   // //push away the clone
+    //   // element.style.animation = "push-right 500ms 1 forwards cubic-bezier(.5,0,1,.5)";
+    //   // //remove the clone after the animation
+    //   // setTimeout(() => {
+    //   //   this.$el.parentElement!.removeChild(element);
+    //   // }, 750);
+    // }
+
+    @Watch("value", { deep: true })
+    async handleValuePropChanged() {
+      // if a curl command was pasted in the url box, process it and replace the current request
+      if (this.value.url && this.value.url.trim().toLowerCase().startsWith('curl ')) {
+        const cmd = parseCurl(this.value.url);
+        this.value.url = cmd.url;
+        this.value.method = parseString(RequestMethod, cmd.method) || RequestMethod.Get;
+        this.value.headers = Object.entries(cmd.header).map(([name, value], key) => ({ key, name, value: value || '' }));
+        if (cmd.body) {
+          // simple check to determine body type, might not be 100% accurate
+          if (cmd.body.includes('{')) {
+            this.value.bodyType = RequestBodyType.JSON
+          } else {
+            this.value.bodyType = RequestBodyType.Form;
+          }
+        } else {
+          this.value.bodyType = RequestBodyType.None;
+        }
+        this.value.body = cmd.body || '';
+        this.pulseForm();
+      }
     }
 
     addHeader() {
@@ -230,7 +271,7 @@
         this.$notify.error({title: "Invalid URL", message: ""});
         return;
       }
-      if(this.payloadTypeIsJSON && !isJSON(this.value.jsonPayload)) {
+      if(this.bodyTypeIsJSON && !isJSON(this.value.body)) {
         this.$notify.error({title: "Invalid JSON Payload", message: ""});
         return;
       }
@@ -270,6 +311,13 @@
       // //use incrementally lower z-index so that new clones appear under older ones
       // (this.transitionClone as HTMLElement).style.zIndex = (this.zIndex--)+"";
     }
+
+    pulseForm() {
+      pulse(this.$refs.requestBar as HTMLElement);
+      pulse((this.$refs.authForm as Vue).$el as HTMLElement);
+      pulse((this.$refs.headerForm as Vue).$el as HTMLElement);
+      pulse((this.$refs.payloadForm as Vue).$el as HTMLElement);
+    }
   }
 </script>
 
@@ -287,7 +335,7 @@
     }
 
     .request-bar {
-      padding-right: 20px;
+      margin-right: 20px;
       .el-select {
         width: 100px;
       }
@@ -361,6 +409,15 @@
           display: unset;
         }
       }
+    }
+
+    .body-editor {
+      width: 100%;
+      height: 300px;
+      background-color: #1c1c1c;
+      color: white;
+      padding: 10px;
+      border: 0;
     }
   }
 

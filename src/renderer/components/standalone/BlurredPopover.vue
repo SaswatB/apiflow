@@ -74,6 +74,8 @@
       backdrop-filter: blur(3px);
       background-color: #000a1277;
       color: white;
+      box-shadow: white 0 0 5px;
+      border-radius: 5px;
     }
   }
 </style>

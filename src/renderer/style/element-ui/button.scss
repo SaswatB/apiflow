@@ -2,6 +2,7 @@ $--button-default-font-color: $--text-font-color;
 $--button-default-background-color: unset;
 $--button-hover-background-color: $--color-hover;
 $--button-disabled-background-color: $--disabled-background-color;
+$--button-primary-background-color: transparent;
 @import "element-ui/packages/theme-chalk/src/button.scss";
 
 @include b(button)  {
@@ -18,5 +19,8 @@ $--button-disabled-background-color: $--disabled-background-color;
 
     @include when(disabled) {
         background-color: $--button-default-background-color;
+    }
+    @include m(primary) {
+        font-weight: bold;
     }
 }

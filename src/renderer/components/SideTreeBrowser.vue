@@ -32,14 +32,14 @@
       @current-change="data => itemSelected(data.id)">
       <div slot-scope="{ data, node }" class="tree-node">
         <i :class="itemIcon" class="mdi tree-icon"/>
-        <span>{{ node.label }}</span>
+        <span class="title">{{ node.label }}</span>
         <div class="spacer"/>
         <BlurredPopover :ref="'editItemPopover_'+data.id" :title="'Edit ' + itemName" :width="200" :height="100">
           <el-button-group class="block">
             <el-button v-tooltip="'Rename'" type="warning" @click="confirmRenameItem(data)"><i class="mdi mdi-rename-box"/></el-button>
             <el-button v-tooltip="'Delete'" type="danger" @click="confirmDeleteItem(data, node)"><i class="mdi mdi-delete"/></el-button>
           </el-button-group>
-          <el-button slot="reference" @click.stop><i class="mdi mdi-dots-vertical"/></el-button>
+          <el-button slot="reference" class="edit-button" @click.stop><i class="mdi mdi-dots-vertical"/></el-button>
         </BlurredPopover>
       </div>
     </el-tree>
@@ -176,6 +176,7 @@ import { ElInput } from "element-ui/types/input";
     .el-tree-node__content {
       transition: background-color 150ms linear;
       height: unset;
+      border-radius: 4px;
     }
     .el-tree-node:hover>.el-tree-node__content,
     .el-tree-node:focus>.el-tree-node__content {
@@ -188,15 +189,19 @@ import { ElInput } from "element-ui/types/input";
     .tree-node {
       display: flex;
       width: 100%;
-      padding: 3px 0;
       font-size: 14px;
+      align-items: stretch;
 
+      .title {
+        padding: 3px 0;
+      }
       .spacer {
         flex-grow: 1;
       }
-      button {
+      .edit-button {
         padding: 5px;
         margin-right: 0px;
+        height: 100%;
       }
     }
     .tree-icon {

@@ -226,6 +226,9 @@
     get isNodeEditor() { return this.propEditor == "node"; }
     get isEdgeEditor() { return this.propEditor == "edge"; }
 
+    get isNodeActiveEditor() { return this.activePropEditor.startsWith("node-"); }
+    get isEdgeActiveEditor() { return this.activePropEditor.startsWith("edge-"); }
+
     get isPlayNode() { return this.selectedNode.data.type == FlowNodeType.Play}
     get isRequestNode() { return this.selectedNode.data.type == FlowNodeType.Request}
     get isWSConnectNode() { return this.selectedNode.data.type == FlowNodeType.WSConnect}
@@ -291,20 +294,22 @@
 
     nodeSelected(node: any) {
       this.propEditor = "node";
-      if(!this.activePropEditor.startsWith("node-")) this.activePropEditor = "node-editor"
+      if(!this.isNodeActiveEditor) this.activePropEditor = "node-editor"
       this.selectedNode = node;
       this.selectedEdge = {};
     }
 
     edgeSelected(edge: any) {
       this.propEditor = "edge";
-      if(!this.activePropEditor.startsWith("edge-")) this.activePropEditor = "edge-editor"
+      if(!this.isEdgeActiveEditor) this.activePropEditor = "edge-editor"
       this.selectedNode = {};
       this.selectedEdge = edge;
     }
 
     clearSelection() {
       this.propEditor = "none";
+      if(this.isNodeActiveEditor || this.isEdgeActiveEditor) 
+        this.activePropEditor = "flow-editor";
       this.selectedNode = {};
       this.selectedEdge = {};
       this.graph.clearSelection(true);

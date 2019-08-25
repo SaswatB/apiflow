@@ -1,7 +1,7 @@
 <template>
   <!-- TODO: put a pr for the height change -->
   <!-- eslint-disable -->
-  <span>
+  <div>
     <transition
       :name="transition"
       @after-enter="handleAfterEnter"
@@ -21,7 +21,7 @@
       </div>
     </transition>
     <slot name="reference"></slot>
-  </span>
+  </div>
 </template>
 <script lang="ts">
 /* eslint-disable */

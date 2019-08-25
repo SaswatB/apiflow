@@ -3,7 +3,7 @@ import { VM } from 'vm2';
 import { SendCurlRequest } from '@/sendCurl';
 import { RequestBodyType, Request, RequestAuthenticationType } from '@/model/Request';
 
-export function sendRequest(request: Request, linkedValueData: { [index: string]: string }, sandbox: object = {}) {
+export async function sendRequest(request: Request, linkedValueData: { [index: string]: string }, sandbox: object = {}) {
   // use a sandboxed environment to run user provided (or default) expressions
   const vm = new VM({
     timeout: 1000,
@@ -12,9 +12,9 @@ export function sendRequest(request: Request, linkedValueData: { [index: string]
 
   // validate the request
   if (request.method === undefined) {
-    return Promise.reject(new Error("Method not provided"));
+    throw new Error("Method not provided");
   } else if (request.url === undefined) {
-    return Promise.reject(new Error("URL not provided"));
+    throw new Error("URL not provided");
   }
 
   let args: SendCurlRequest = { method: request.method, url: request.url, headers: [] };
@@ -39,7 +39,7 @@ export function sendRequest(request: Request, linkedValueData: { [index: string]
           break;
       }
     } catch (err) {
-      return Promise.reject(new Error(`Invalid JSON Payload (${err.message || "Unknown Error"})`));
+      throw new Error(`Invalid JSON Payload (${err.message || "Unknown Error"})`);
     }
   }
 

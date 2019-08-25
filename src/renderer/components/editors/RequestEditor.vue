@@ -192,7 +192,7 @@
     }
 
     // @Watch("value")
-    // async handleValueChanged() {
+    // handleValueChanged() {
     //   // if(this.transitionClone == undefined) return;
     //   // let element = (this.transitionClone as HTMLElement);
     //   // this.transitionClone = undefined;
@@ -205,7 +205,7 @@
     // }
 
     @Watch("value", { deep: true })
-    async handleValuePropChanged() {
+    handleValuePropChanged() {
       // if a curl command was pasted in the url box, process it and replace the current request
       if (this.value.url && this.value.url.trim().toLowerCase().startsWith('curl ')) {
         const cmd = parseCurl(this.value.url);

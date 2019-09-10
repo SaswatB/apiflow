@@ -173,6 +173,8 @@
 </script>
 
 <style lang="scss">
+  @import "@/style/variables.scss";
+
   .stb {
     .el-collapse-item__content {
       padding-left: 5px;
@@ -189,10 +191,10 @@
     }
     .el-tree-node:hover>.el-tree-node__content,
     .el-tree-node:focus>.el-tree-node__content {
-      background-color: rgba(0, 0, 0, .1);
+      background-color: $--color-hover;
     }
     .el-tree--highlight-current .el-tree-node.is-current>.el-tree-node__content {
-      background-color: rgba(0, 0, 0, .2);
+      background-color: black;
     }
 
     .tree-node {

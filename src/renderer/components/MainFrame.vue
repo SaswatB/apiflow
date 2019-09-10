@@ -4,7 +4,7 @@
       <!-- TODO: limit and persist split -->
       <!-- Sidebar -->
       <SplitArea :size="25" :min-size="200">
-        <vue-scroll :ops="{ scrollPanel: { scrollingX: false } }" class="sidebar">
+        <vue-scroll class="sidebar">
           <div class="sidebar-content">
             <el-select v-model="currentProject" placeholder="Project">
               <el-option v-for="item in projects" :key="item.value" :label="item.label" :value="item.value"/>
@@ -147,11 +147,13 @@
 </script>
 
 <style lang="scss">
+  @import "@/style/mixins.scss";
+
   .frame {
     height: calc(100% - 30px);
 
     .sidebar {
-      background-color: rgba(0, 0, 0, .2);
+      @include dark-container;
 
       .sidebar-content {
         padding: 20px;
@@ -168,10 +170,19 @@
       }
     }
 
+    // hack to hide sidebar gutter as it interferes with .content's box shadow
+    > .split > .gutter {
+      background-color: rgba(0, 0, 0, 0.55) !important;
+    }
+
     .content {
       height: 100%;
       overflow: hidden;
       position: relative;
+
+      // this is a reverse of .elevated to make it seem like the titlebar and sidebar are floating
+      box-shadow: #00000021 0px 1px 20px 5px, inset 7px 7px 10px -7px #000;
+
       .editor {
         position: absolute;
         top: 0;
@@ -182,7 +193,7 @@
     }
   }
   .fade-enter-active, .fade-leave-active {
-    transition: opacity .3s;
+    transition: opacity 300ms;
   }
   .fade-enter, .fade-leave-to {
     opacity: 0;

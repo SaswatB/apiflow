@@ -19,5 +19,9 @@
     display: flex;
     flex-direction: column;
     background-image: linear-gradient( 135deg, #37474f 10%, #102027 100%);
+    background-image: url('assets/background.jpg');
+    background-size: cover;
+    background-position: bottom right;
+
   }
 </style>

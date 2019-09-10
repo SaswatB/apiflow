@@ -2,91 +2,93 @@
   <div class="request-pane">
     <Split :gutter-size="12">
       <!-- TODO: limit and persist split -->
-      <SplitArea :size="50">
-        <vue-scroll :ops="{ scrollPanel: { scrollingX: false } }">
-          <div ref="requestBar" class="request-bar">
-            <el-input v-model="value.url" placeholder="URL" required>
-              <el-select slot="prepend" v-model="value.method" placeholder="Method">
-                <el-option v-for="item in methodOptions" :key="item" :label="item" :value="item"/>
-              </el-select>
-              <el-button v-tooltip="'Send Request'" slot="append" @click="sendRequest"><i class="mdi mdi-send"/></el-button>
-            </el-input>
-          </div>
-          <el-collapse v-model="activeForms" class="request-form">
-            <!-- Authentication Form -->
-            <MorphingCollapse ref="authForm" :sub-item-count="3" :collapse-item-name="authFormName">
-              <template slot="select">
-                <el-select v-model="value.authType" :class="authenticationTypeIsNone ? 'none' : ''" placeholder="Type" @change="autoOpenAuthenticationPane">
-                  <el-option v-for="item in authenticationOptions" :key="item" :label="item" :value="item"/>
+      <SplitArea :size="50" :min-size="356">
+        <vue-scroll class="request-editor-scroll elevated">
+          <div class="request-editor">
+            <div ref="requestBar" class="request-bar">
+              <el-input v-model="value.url" placeholder="URL" required>
+                <el-select slot="prepend" v-model="value.method" placeholder="Method">
+                  <el-option v-for="item in methodOptions" :key="item" :label="item" :value="item"/>
                 </el-select>
-              </template>
-              <template slot="subSlot1">
-                <div v-if="authenticationTypeIsNone" class="muted">No Authentication Type Selected</div>
-              </template>
-              <template slot="subSlot2">
-                <div v-if="authenticationTypeIsSimple">
-                  <el-form @submit.native.prevent="">
-                    <el-form-item>
-                      <StoredLinkedInput :link-id="value.authSimpleUsername" link-name="Auth Username" field-name="Username" required/>
-                    </el-form-item>
-                    <el-form-item>
-                      <StoredLinkedInput :link-id="value.authSimplePassword" link-name="Auth Password" field-name="Password" required/>
-                    </el-form-item>
+                <el-button v-tooltip="'Send Request'" slot="append" @click="sendRequest"><i class="mdi mdi-send"/></el-button>
+              </el-input>
+            </div>
+            <el-collapse v-model="activeForms" class="request-form">
+              <!-- Authentication Form -->
+              <MorphingCollapse ref="authForm" :sub-item-count="3" :collapse-item-name="authFormName">
+                <template slot="select">
+                  <el-select v-model="value.authType" :class="authenticationTypeIsNone ? 'none' : ''" placeholder="Type" @change="autoOpenAuthenticationPane">
+                    <el-option v-for="item in authenticationOptions" :key="item" :label="item" :value="item"/>
+                  </el-select>
+                </template>
+                <template slot="subSlot1">
+                  <div v-if="authenticationTypeIsNone" class="muted">No Authentication Type Selected</div>
+                </template>
+                <template slot="subSlot2">
+                  <div v-if="authenticationTypeIsSimple">
+                    <el-form @submit.native.prevent="">
+                      <el-form-item>
+                        <StoredLinkedInput :link-id="value.authSimpleUsername" link-name="Auth Username" field-name="Username" required/>
+                      </el-form-item>
+                      <el-form-item>
+                        <StoredLinkedInput :link-id="value.authSimplePassword" link-name="Auth Password" field-name="Password" required/>
+                      </el-form-item>
+                    </el-form>
+                  </div>
+                </template>
+                <template slot="subSlot3">
+                  <div v-if="authenticationTypeIsToken"><StoredLinkedInput :link-id="value.authToken" link-name="Auth Token" field-name="Token" required/></div>
+                </template>
+              </MorphingCollapse>
+              <!-- Headers Form -->
+              <el-collapse-item ref="headerForm" :name="headersFormName" :title="headersFormName" class="header-form">
+                <div v-for="header in value.headers" :key="header.key" class="header-form-row">
+                  <el-form :inline="true" @submit.prevent="">
+                    <StoredLinkedInput :link-id="header.name" :link-name="'Header ' + header.key + ' Name'" field-name="Name" required/>
+                    <StoredLinkedInput :link-id="header.value" :link-name="'Header ' + header.key + ' Value'" field-name="Value" required/>
+                    <el-button class="remove-btn" @click="removeHeader(header.key)"><i class="mdi mdi-minus"/></el-button>
                   </el-form>
                 </div>
-              </template>
-              <template slot="subSlot3">
-                <div v-if="authenticationTypeIsToken"><StoredLinkedInput :link-id="value.authToken" link-name="Auth Token" field-name="Token" required/></div>
-              </template>
-            </MorphingCollapse>
-            <!-- Headers Form -->
-            <el-collapse-item ref="headerForm" :name="headersFormName" :title="headersFormName" class="header-form">
-              <div v-for="header in value.headers" :key="header.key" class="header-form-row">
-                <el-form :inline="true" @submit.prevent="">
-                  <StoredLinkedInput :link-id="header.name" :link-name="'Header ' + header.key + ' Name'" field-name="Name" required/>
-                  <StoredLinkedInput :link-id="header.value" :link-name="'Header ' + header.key + ' Value'" field-name="Value" required/>
-                  <el-button class="remove-btn" @click="removeHeader(header.key)"><i class="mdi mdi-minus"/></el-button>
-                </el-form>
-              </div>
-              <el-button class="add-btn" @click="addHeader"><i class="mdi mdi-plus"/></el-button>
-            </el-collapse-item>
-            <!-- Payload Form -->
-            <MorphingCollapse ref="payloadForm" :sub-item-count="5" :collapse-item-name="payloadFormName">
-              <template slot="select">
-                <el-select v-model="value.bodyType" :class="bodyTypeIsNone ? 'none' : ''" placeholder="Type">
-                  <el-option v-for="item in payloadOptions" :key="item" :label="item" :value="item"/>
-                </el-select>
-              </template>
-              <template slot="subSlot1">
-                <div v-if="bodyTypeIsNone" class="muted">No Body Type Selected</div>
-              </template>
-              <template slot="subSlot2">
-                <div v-if="bodyTypeIsRaw">
-                  <textarea 
-                    v-model="value.body"
-                    class="body-editor"/>
-                </div>
-              </template>
-              <template slot="subSlot3">
-                <div v-if="bodyTypeIsForm">
-                  <textarea 
-                    v-model="value.body"
-                    class="body-editor"/>
-                </div>
-              </template>
-              <template slot="subSlot4">
-                <div v-if="bodyTypeIsJSON">
-                  <AceEditor
-                    ref="jsonPayloadEditor"
-                    v-model="value.body"
-                    lang="javascript"
-                    theme="merbivore_soft"
-                    width="100%"
-                    height="300"/>
-                </div>
-              </template>
-            </MorphingCollapse>
-          </el-collapse>
+                <el-button class="add-btn" @click="addHeader"><i class="mdi mdi-plus"/></el-button>
+              </el-collapse-item>
+              <!-- Payload Form -->
+              <MorphingCollapse ref="payloadForm" :sub-item-count="5" :collapse-item-name="payloadFormName">
+                <template slot="select">
+                  <el-select v-model="value.bodyType" :class="bodyTypeIsNone ? 'none' : ''" placeholder="Type">
+                    <el-option v-for="item in payloadOptions" :key="item" :label="item" :value="item"/>
+                  </el-select>
+                </template>
+                <template slot="subSlot1">
+                  <div v-if="bodyTypeIsNone" class="muted">No Body Type Selected</div>
+                </template>
+                <template slot="subSlot2">
+                  <div v-if="bodyTypeIsRaw">
+                    <textarea 
+                      v-model="value.body"
+                      class="body-editor"/>
+                  </div>
+                </template>
+                <template slot="subSlot3">
+                  <div v-if="bodyTypeIsForm">
+                    <textarea 
+                      v-model="value.body"
+                      class="body-editor"/>
+                  </div>
+                </template>
+                <template slot="subSlot4">
+                  <div v-if="bodyTypeIsJSON">
+                    <AceEditor
+                      ref="jsonPayloadEditor"
+                      v-model="value.body"
+                      lang="javascript"
+                      theme="merbivore_soft"
+                      width="100%"
+                      height="300"/>
+                  </div>
+                </template>
+              </MorphingCollapse>
+            </el-collapse>
+          </div>
         </vue-scroll>
       </SplitArea>
       <SplitArea :size="50">
@@ -94,6 +96,7 @@
           ref="responseViewer"
           v-model="prettyResponse"
           disabled
+          class="elevated"
           lang="javascript"
           theme="merbivore_soft"
           width="100%"
@@ -332,6 +335,8 @@
 </script>
 
 <style lang="scss">
+  @import "@/style/mixins.scss";
+
   .request-pane {
     height: 100%;
     padding: 12px;
@@ -340,19 +345,18 @@
       min-height: unset !important; // TODO: look into why this is needed for scrolling
     }
 
-    .gutter {
-      border-left: 1px solid rgba(255, 255, 255, .2);
+    .request-editor-scroll {
+      @include dark-container;
+      .request-editor {
+        padding: 10px;
+      }
     }
 
-    .request-bar {
-      margin-right: 20px;
-      .el-select {
-        width: 100px;
-      }
+    .request-bar .el-select {
+      width: 100px;
     }
     .request-form {
       margin: 20px;
-      padding-right: 20px;
     }
 
     .header-form {

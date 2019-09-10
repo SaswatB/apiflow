@@ -68,9 +68,18 @@ body {
     position: relative;
 }
 
+.split {
+    overflow: unset !important;
+}
+
 .gutter {
-  background-image: unset !important;
-  background-color: unset !important;
+    background-image: unset !important;
+    background-color: unset !important;
+}
+
+.elevated {
+    box-shadow: inset #00000021 0px 1px 20px 5px, 0px 0px 10px 0px #000;
+    border-radius: 5px;
 }
 
 // Pulse animation

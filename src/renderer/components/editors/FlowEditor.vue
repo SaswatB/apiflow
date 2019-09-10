@@ -5,7 +5,7 @@
         <FlowDragDropGraph ref="graph" v-model="value.nodes" @node-selected="nodeSelected" @edge-selected="edgeSelected"/>
       </SplitArea>
       <SplitArea :size="47">
-        <div class="prop-editor">
+        <div class="prop-editor elevated">
           <el-tabs v-model="activePropEditor" :tab-position="'left'">
             <!-- Flow Editor Pane -->
             <el-tab-pane label="Flow Editor" name="flow-editor">
@@ -483,14 +483,17 @@
 </script>
 
 <style lang="scss">
+  @import "@/style/mixins.scss";
+
   .flow-pane {
     height: 100%;
 
     .prop-editor {
-      width: 100%;
-      height: 100%;
-      padding: 0 10px;
-      background-color: rgba(0,0,0,.2);
+      @include dark-container;
+      width: calc(100% - 20px);
+      height: calc(100% - 20px);
+      margin: 10px;
+      padding-right: 10px;
 
       #tab-results {
         transition: border-bottom .5s ease-in-out;

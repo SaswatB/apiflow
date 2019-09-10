@@ -37,12 +37,15 @@
 </script>
 
 <style lang="scss">
+  @import "@/style/mixins.scss";
+
   .titlebar {
+    @include dark-container;
+
     -webkit-app-region: drag;
 
     width: 100%;
     padding: 5px;
-    background-color: rgba(0, 0, 0, 0.2);
     position: relative;
 
     .title {

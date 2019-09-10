@@ -191,7 +191,7 @@
   import isURL from "validator/lib/isURL"
   import { js as beautify } from "js-beautify"
 
-  import { FlowNodeType, FlowPlayNodeId, FlowNodeRequestSettings, FlowNodeSleepSettings, FlowContext, Flow } from "@/model/Flow"
+  import { FlowNodeType, FlowPlayNodeId, FlowNodeRequestSettings, FlowNodeSleepSettings, FlowContext, Flow, FlowNodeWSConnectSettings } from "@/model/Flow"
   import { FlowRunnerLogLevel, FlowRunnerLogEntryTargetPane, FlowRunnerLogEntry, FlowRunner } from "@/utils/FlowRunner"
   import { dumpObjectStrings } from "@/utils/utils"
 
@@ -203,25 +203,31 @@
     @Prop(Object) value!: Flow
     @Prop(Object) ctx!: FlowContext
 
-    logTimeFormat = "HH:mm:ss.SSS"
-    logFullTimeFormat = "L-HH:mm:ss.SSS" // TODO: add full date format as an option when viewing logs
-    logLevelFilter = "verbose" // TODO: persist
-    propEditor = "none"
-    activePropEditor = "flow-editor"
-    selectedNode: any = {}
-    selectedEdge: any = {}
-    flowRunner = FlowRunner.placeholder()
-    linkedValueEditorVisible = false
+    public $refs!: Vue['$refs'] & {
+      graph: FlowDragDropGraph,
+      addItemPopover: BlurredPopover,
+      nodeResultViewer: any,
+    };
+
+    public readonly logTimeFormat = "HH:mm:ss.SSS"
+    private readonly logFullTimeFormat = "L-HH:mm:ss.SSS" // TODO: add full date format as an option when viewing logs
+    public logLevelFilter = "verbose" // TODO: persist
+    public propEditor = "none"
+    public activePropEditor = "flow-editor"
+    public selectedNode: any = {}
+    public selectedEdge: any = {}
+    public flowRunner = FlowRunner.placeholder()
+    public linkedValueEditorVisible = false
 
     get requests() {
-      let reqs = []
+      let reqs: { name: string, id: string }[] = []
       for(let id in this.ctx.requests) {
         if(this.ctx.requests.hasOwnProperty(id)) reqs.push({name:this.ctx.requests[id].name, id})
       }
       return reqs
     }
 
-    get graph() { return this.$refs.graph as FlowDragDropGraph; }
+    get graph() { return this.$refs.graph; }
 
     get isNodeEditor() { return this.propEditor == "node"; }
     get isEdgeEditor() { return this.propEditor == "edge"; }
@@ -285,28 +291,28 @@
     @Watch("activePropEditor")
     handleActivePropEditorChanged(val: string) {
       if(val === "node-results") {
-        const ace = (this.$refs.nodeResultViewer as any);
+        const ace = this.$refs.nodeResultViewer;
         if(ace) {
           ace.editor.setReadOnly(true);
         }
       }
     }
 
-    nodeSelected(node: any) {
+    public nodeSelected(node: any) {
       this.propEditor = "node";
       if(!this.isNodeActiveEditor) this.activePropEditor = "node-editor"
       this.selectedNode = node;
       this.selectedEdge = {};
     }
 
-    edgeSelected(edge: any) {
+    public edgeSelected(edge: any) {
       this.propEditor = "edge";
       if(!this.isEdgeActiveEditor) this.activePropEditor = "edge-editor"
       this.selectedNode = {};
       this.selectedEdge = edge;
     }
 
-    clearSelection() {
+    public clearSelection() {
       this.propEditor = "none";
       if(this.isNodeActiveEditor || this.isEdgeActiveEditor) 
         this.activePropEditor = "flow-editor";
@@ -315,13 +321,13 @@
       this.graph.clearSelection(true);
     }
 
-    deleteSelection() {
+    public deleteSelection() {
       if(this.graph.deleteSelection()) {
         this.clearSelection();
       }
     }
 
-    getClassFromLogLevel(level: FlowRunnerLogLevel) {
+    public getClassFromLogLevel(level: FlowRunnerLogLevel) {
       switch(level) {
         case FlowRunnerLogLevel.ERROR:
           return "error-entry";
@@ -334,7 +340,7 @@
       }
     }
 
-    getFormattedTagFromLogLevel(level: FlowRunnerLogLevel) {
+    public getFormattedTagFromLogLevel(level: FlowRunnerLogLevel) {
       switch(level) {
         case FlowRunnerLogLevel.ERROR:
           return "ERR ";
@@ -347,7 +353,7 @@
       }
     }
 
-    copyLog(filterNodeId?: string) {
+    public copyLog(filterNodeId?: string) {
       let text = "";
       for(let entry of this.flowRunner.log) {
         if(filterNodeId !== undefined && entry.nodeId != filterNodeId) continue;
@@ -360,12 +366,12 @@
       this.$notify({title: "Log Copied", message: "", type: 'success'});
     }
 
-    showFilterLog(event: any) {
+    public showFilterLog(event: any) {
       event.stopPropagation();
       // setTimeout(() => {this.$refs.addItemPopoverTextbox.focus()}, 150);
     }
 
-    linkedValueEditorInit(editor: any) {
+    public linkedValueEditorInit(editor: any) {
       let customCompleters = [{
         getCompletions: (editor: any, session: any, pos: any, prefix: any, callback: any) => {
           // get the index of the token before the cursor
@@ -416,7 +422,7 @@
       editor.renderer.setShowGutter(false);
     }
 
-    onLogClick(logEntry: FlowRunnerLogEntry) {
+    public onLogClick(logEntry: FlowRunnerLogEntry) {
       if(logEntry.nodeId === undefined) return;
       this.graph.selectNodeById(logEntry.nodeId);
       switch(logEntry.targetPane){
@@ -432,7 +438,7 @@
       }
     }
 
-    runFlow() {
+    public runFlow() {
       let dagNode = this.graph.getDagNode(FlowPlayNodeId);
       if(dagNode == undefined) {
         this.$notify.error({title: "Unexpected error when trying to run flow", message: "Missing play node"});
@@ -456,8 +462,8 @@
       this.activePropEditor = "results";
     }
 
-    testWSConnectUrl() {
-      const url = (this.nodeSettings as any).wsconnectUrl;
+    public testWSConnectUrl() {
+      const url = (this.nodeSettings as FlowNodeWSConnectSettings).wsconnectUrl;
       if(url === undefined || !isURL(url, {protocols: ["ws", "wss"], require_tld: false})) {
         this.$notify.error({title: "Invalid URL", message: ""});
         return;

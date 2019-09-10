@@ -68,6 +68,13 @@
 
   @Component({ components: { SideTreeBrowser, RequestEditor, FlowEditor } })
   export default class MainFrame extends Vue {
+    public $refs!: Vue['$refs'] & {
+      flowTreeBrowser: SideTreeBrowser,
+      requestTreeBrowser: SideTreeBrowser,
+      flowEditor: FlowEditor,
+      requestEditor: RequestEditor,
+    };
+
     ProceduresStore = getModule(Procedures, this.$store)
     CounterStore = getModule(Counter, this.$store)
     projects = [ //TODO: persist
@@ -115,7 +122,7 @@
 
       // TODO: fix and replace with nextTick
       setTimeout(() => { this.refreshFlowTree(); }, 100);
-      setTimeout(() => { (this.$refs.flowTreeBrowser as any).selectItem(id); }, 150);
+      setTimeout(() => { this.$refs.flowTreeBrowser.selectItem(id); }, 150);
     }
     addRequest(name: string) {
       let id = "Request_"+uuidv4();
@@ -124,15 +131,15 @@
 
       // TODO: fix and replace with nextTick
       setTimeout(() => { this.refreshRequestTree(); }, 100);
-      setTimeout(() => { (this.$refs.requestTreeBrowser as any).selectItem(id); }, 150);
+      setTimeout(() => { this.$refs.requestTreeBrowser.selectItem(id); }, 150);
     }
     flowSelected(id: string) {
-      if(this.$refs.flowEditor) (this.$refs.flowEditor as any).clearSelection();
+      if(this.$refs.flowEditor) this.$refs.flowEditor.clearSelection();
       this.flowEdit = Flow.getFromStore(this.ProceduresStore.flows, id);
       this.editorType = "flow";
     }
     requestSelected(id: string) {
-      if(this.$refs.requestEditor) (this.$refs.requestEditor as any).prepareTransition();
+      if(this.$refs.requestEditor) this.$refs.requestEditor.prepareTransition();
       this.requestEdit = Request.getFromStore(this.ProceduresStore.requests, id);
       this.editorType = "request";
     }

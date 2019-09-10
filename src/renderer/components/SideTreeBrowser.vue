@@ -63,7 +63,7 @@
   import BlurredPopover from "@/components/standalone/BlurredPopover.vue"
   import { Procedure } from "@/model/Procedure";
   import Procedures from "@/store/modules/Procedures";
-import { ElInput } from "element-ui/types/input";
+  import { ElInput } from "element-ui/types/input";
 
   @Component({ components: { BlurredPopover } })
   export default class SideTreeBrowser extends Vue {
@@ -71,6 +71,15 @@ import { ElInput } from "element-ui/types/input";
     @Prop(Array) value!: Procedure[]
     @Prop(String) itemName!: string
     @Prop(String) itemIcon!: string
+
+    public $refs!: Vue['$refs'] & {
+      addItemPopover: BlurredPopover,
+      addItemPopoverTextbox: ElInput,
+      tree: ElTree<any, any>,
+      // ['editItemPopover_'+data.id]: BlurredPopover
+      renameDialogInput: ElInput,
+    };
+
     ProceduresStore = getModule(Procedures, this.$store)
     addItemName = ""
     renameDialogVisible = false
@@ -84,9 +93,9 @@ import { ElInput } from "element-ui/types/input";
     @Watch("openProcedure")
     handleOpenProcedureChange(procedure: Procedure) {
       // if a different procedure has been selected in a different tree, clear our selected one
-      const currentKey = (this.$refs.tree as ElTree).getCurrentKey()
+      const currentKey = this.$refs.tree.getCurrentKey()
       if(currentKey != null && currentKey != procedure) {
-        (this.$refs.tree as ElTree).setCurrentKey(null)
+        this.$refs.tree.setCurrentKey(null)
       }
     }
 
@@ -95,7 +104,7 @@ import { ElInput } from "element-ui/types/input";
       for(let procedure of this.value) {
         if(procedure.id === this.openProcedure) {
           this.$emit("item-selected", procedure.id);
-          (this.$refs.tree as ElTree).setCurrentKey(procedure.id);
+          this.$refs.tree.setCurrentKey(procedure.id);
           break;
         }
       }
@@ -109,11 +118,11 @@ import { ElInput } from "element-ui/types/input";
     }
     showAddItem(event: MouseEvent) {
       event.stopPropagation();
-      setTimeout(() => {(this.$refs.addItemPopoverTextbox as ElInput).focus()}, 150);
+      setTimeout(this.$refs.addItemPopoverTextbox.focus, 150)
     }
     addItem() {
       this.$emit("add-item", this.addItemName);
-      (this.$refs.addItemPopover as BlurredPopover).hide();
+      this.$refs.addItemPopover.hide();
       // wait a bit before clearing so that the user doesn't see an empty text box
       setTimeout(() => {this.addItemName = ""}, 300);
     }
@@ -122,7 +131,7 @@ import { ElInput } from "element-ui/types/input";
       this.renameDialogVisible = true;
       this.renameDialogNewName = data.label!;
       this.renameDialogData = data;
-      setTimeout(() => {(this.$refs.renameDialogInput as ElInput).focus()}, 150);
+      setTimeout(this.$refs.renameDialogInput.focus, 150);
     }
     renameItemFromDialogInput() {
       // TODO: do rename properly by sending an event to the parent
@@ -150,7 +159,7 @@ import { ElInput } from "element-ui/types/input";
       children.splice(index, 1);
     }
     selectItem(id: Procedure["id"]) {
-      (this.$refs.tree as ElTree).setCurrentKey(id)
+      this.$refs.tree.setCurrentKey(id)
       this.itemSelected(id)
     }
     itemSelected(id: Procedure["id"]) {

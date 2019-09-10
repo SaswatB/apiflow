@@ -28,9 +28,9 @@ function nodeNamePrint(nodeType: FlowNodeType, nodeName?: string) {
 
 export class FlowRunner {
   private dagRoot: FlowDagNode;
-  private log: Array<FlowRunnerLogEntry> = [];
+  public log: Array<FlowRunnerLogEntry> = [];
   // map between a node and an array of its results (one entry for every time its executed in this run)
-  private results: {[index:string]: Array<any>} = {}
+  public results: {[index:string]: Array<any>} = {}
 
   public constructor(private flow: Flow, private ctx: FlowContext) {
     this.dagRoot = d3dag.dratify()(flow.nodes);

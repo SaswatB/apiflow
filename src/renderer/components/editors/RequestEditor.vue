@@ -112,6 +112,7 @@
   import difference from "lodash/difference"
   import { js as beautify } from "js-beautify"
   import parseCurl from "parse-curl"
+  import { ElCollapseItem } from "element-ui/types/collapse-item";
 
   import "brace"
   import "brace/ext/language_tools"
@@ -127,11 +128,20 @@
   import MorphingCollapse from "@/components/standalone/MorphingCollapse.tsx"
 
   import { sendRequest } from "@/utils/requestUtils"
-  import { pulse, parseString } from "../../utils/utils";
+  import { pulse, parseString } from "@/utils/utils";
 
   @Component({ components: { AceEditor, StoredLinkedInput, MorphingCollapse } })
   export default class RequestEditor extends Vue {
     @Prop(Object) value!: Request
+
+    public $refs!: Vue['$refs'] & {
+      requestBar: HTMLElement,
+      authForm: MorphingCollapse,
+      headerForm: ElCollapseItem,
+      payloadForm: MorphingCollapse,
+      jsonPayloadEditor: any,
+      responseViewer: any,
+    };
     
     ProceduresStore = getModule(Procedures, this.$store)
     activeForms:Array<string> = []
@@ -168,7 +178,7 @@
 
 
     mounted() {
-      (this.$refs.responseViewer as any).editor.setReadOnly(true);
+      this.$refs.responseViewer.editor.setReadOnly(true);
     }
 
 
@@ -186,7 +196,7 @@
       if(diff.length == 1) {
         // auto focus the json editor if its collapse pane was opened
         if(diff[0] == this.payloadFormName && this.bodyTypeIsJSON) {
-          (this.$refs.jsonPayloadEditor as any).editor.focus();
+          this.$refs.jsonPayloadEditor.editor.focus();
         }
       }
     }
@@ -313,10 +323,10 @@
     }
 
     pulseForm() {
-      pulse(this.$refs.requestBar as HTMLElement);
-      pulse((this.$refs.authForm as Vue).$el as HTMLElement);
-      pulse((this.$refs.headerForm as Vue).$el as HTMLElement);
-      pulse((this.$refs.payloadForm as Vue).$el as HTMLElement);
+      pulse(this.$refs.requestBar);
+      pulse(this.$refs.authForm.$el as HTMLElement);
+      pulse(this.$refs.headerForm.$el as HTMLElement);
+      pulse(this.$refs.payloadForm.$el as HTMLElement);
     }
   }
 </script>

@@ -102,7 +102,7 @@
     "chai": "^4.1.2",
     "devtron": "^1.4.0",
     "electron": "^6.0.0",
-    "electron-builder": "^20.19.2",
+    "electron-builder": "^21.2.0",
     "electron-devtools-installer": "^2.2.4",
     "electron-webpack": "^2.6.2",
     "electron-webpack-ts": "^3.2.0",

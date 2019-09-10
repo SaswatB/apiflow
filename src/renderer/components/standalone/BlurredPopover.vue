@@ -26,9 +26,9 @@
     @Prop({type: String, default: "right"}) placement!: string
     @Prop(String) popoverBodyClass!: string
 
-    popoverVisible = false
+    public popoverVisible = false
 
-    hide() {
+    public hide() {
       this.popoverVisible = false;
     }
   }

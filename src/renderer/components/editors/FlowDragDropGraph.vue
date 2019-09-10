@@ -8,6 +8,7 @@
 
 <script lang="ts">
   import { Vue, Component, Prop, Watch } from "vue-property-decorator"
+  import vuescroll from "vuescroll";
   import { v4 as uuidv4 } from "uuid"
   import * as d3 from "d3"
   import * as d3dag from "d3-dag"
@@ -40,6 +41,11 @@
   export default class FlowDragDropGraph extends Vue {
     @Prop(Array) value!: Array<FlowNode>
 
+    public $refs!: Vue['$refs'] & {
+      graphScroll: vuescroll,
+      graphContainer: HTMLElement
+    };
+
     // svg and its main content groups
     baseSvg!: d3.Selection<SVGSVGElement, unknown, null, undefined>
     dagGroup!: d3.Selection<SVGGElement, unknown, null, undefined>
@@ -64,7 +70,7 @@
 
     mounted() {
       // define the baseSvg and its main content groups
-      this.baseSvg = d3.select(this.$refs.graphContainer as Element).append("svg");
+      this.baseSvg = d3.select(this.$refs.graphContainer).append("svg");
       this.dagGroup = this.baseSvg.append("g");
       this.dagOverlayGroup = this.baseSvg.append("g");
       this.sidebarGroup = this.baseSvg.append("g");
@@ -395,7 +401,7 @@
 
       if((this.scrollDx != 0 || this.scrollDy != 0) && this.scrollTimer == undefined) {
         this.scrollTimer = setInterval(
-          () => {(this.$refs.graphScroll as any).scrollBy({dx: this.scrollDx, dy: this.scrollDy})},
+          () => {this.$refs.graphScroll.scrollBy({x: this.scrollDx, y: this.scrollDy})},
           50) as unknown as number;
       }
     }

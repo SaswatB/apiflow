@@ -131,7 +131,7 @@
   import MorphingCollapse from "@/components/standalone/MorphingCollapse.tsx"
 
   import { sendRequest } from "@/utils/requestUtils"
-  import { pulse, parseString } from "@/utils/utils";
+  import { pulse, parseString, DEFAULT_NOTIFY_OPTIONS } from "@/utils/utils";
 
   @Component({ components: { AceEditor, StoredLinkedInput, MorphingCollapse } })
   export default class RequestEditor extends Vue {
@@ -281,11 +281,11 @@
       //validate arguments
       // TODO: validate more arguments
       if(!isURL(this.value.url || "", {protocols: ["http", "https"], require_tld: false})) {
-        this.$notify.error({title: "Invalid URL", message: ""});
+        this.$notify.error({...DEFAULT_NOTIFY_OPTIONS, title: "Invalid URL"});
         return;
       }
       if(this.bodyTypeIsJSON && !isJSON(this.value.body)) {
-        this.$notify.error({title: "Invalid JSON Payload", message: ""});
+        this.$notify.error({...DEFAULT_NOTIFY_OPTIONS, title: "Invalid JSON Payload"});
         return;
       }
 

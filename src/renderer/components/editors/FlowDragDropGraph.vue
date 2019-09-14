@@ -16,7 +16,7 @@
   declare var ResizeObserver: ResizeObserverType;
 
   import { FlowNodeType, FlowRootNodeId, FlowPlayNodeId, getFlowNodeTypeIcon, FlowNode, FlowDagNode } from "@/model/Flow"
-  import { hasPath, makeAbsoluteContext } from "@/utils/utils"
+  import { hasPath, makeAbsoluteContext, DEFAULT_NOTIFY_OPTIONS } from "@/utils/utils"
 
   const nodeRadius = 30;
   const sideBarElementWidth = 60;
@@ -412,7 +412,7 @@
       let mergeLink = false;
       if(this.hoveredNode != undefined && this.hoveredNode.id != d.id) {
         if(this.hoveredNode.id == FlowPlayNodeId) {
-          this.$notify.error({title: "Cannot link to Play node", message: ""});
+          this.$notify.error({...DEFAULT_NOTIFY_OPTIONS, title: "Cannot link to Play node"});
         } else {
           let linkExists = false;
           for(let id of this.hoveredNode.data.parentIds) { // check for an exising link
@@ -431,10 +431,10 @@
               this.$emit("input", this.value);
               mergeLink = true;
             } else {
-              this.$notify.error({title: "Link would create a dependency cycle", message: ""});
+              this.$notify.error({...DEFAULT_NOTIFY_OPTIONS, title: "Links cannot create a dependency cycle"});
             }
           } else {
-            this.$notify.error({title: "Link Already Exists", message: ""});
+            this.$notify.error({...DEFAULT_NOTIFY_OPTIONS, title: "Link Already Exists"});
           }
         }
       }
@@ -580,7 +580,7 @@
       if(this.selectedNode !== undefined) {
         if(this.selectedNode.d.id == FlowRootNodeId) return false;
         if(this.selectedNode.d.id == FlowPlayNodeId) {
-          this.$notify.error({title: "Cannot Delete Play Node", message: ""});
+          this.$notify.error({...DEFAULT_NOTIFY_OPTIONS, title: "Cannot Delete Play Node"});
           return false;
         }
 

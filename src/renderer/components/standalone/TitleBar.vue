@@ -61,7 +61,7 @@
       button {
         background-color: transparent;
         -webkit-app-region: no-drag;
-        padding: 7px 20px;
+        padding: 9px 20px 5px 20px;
         border: none;
         cursor: pointer;
         color: white;

@@ -193,7 +193,7 @@
 
   import { FlowNodeType, FlowPlayNodeId, FlowNodeRequestSettings, FlowNodeSleepSettings, FlowContext, Flow, FlowNodeWSConnectSettings } from "@/model/Flow"
   import { FlowRunnerLogLevel, FlowRunnerLogEntryTargetPane, FlowRunnerLogEntry, FlowRunner } from "@/utils/FlowRunner"
-  import { dumpObjectStrings } from "@/utils/utils"
+  import { dumpObjectStrings, DEFAULT_NOTIFY_OPTIONS } from "@/utils/utils"
 
   import BlurredPopover from "@/components/standalone/BlurredPopover.vue"
   import FlowDragDropGraph from "@/components/editors/FlowDragDropGraph.vue"
@@ -363,7 +363,7 @@
           entry.entry + "\n";
       }
       (navigator as any).clipboard.writeText(text);
-      this.$notify({title: "Log Copied", message: "", type: 'success'});
+      this.$notify.success({...DEFAULT_NOTIFY_OPTIONS, title: "Log Copied"});
     }
 
     public showFilterLog(event: any) {
@@ -441,7 +441,7 @@
     public runFlow() {
       let dagNode = this.graph.getDagNode(FlowPlayNodeId);
       if(dagNode == undefined) {
-        this.$notify.error({title: "Unexpected error when trying to run flow", message: "Missing play node"});
+        this.$notify.error({...DEFAULT_NOTIFY_OPTIONS, title: "Unexpected error when trying to run flow", message: "Missing play node"});
         return;
       }
       this.flowRunner = new FlowRunner(this.value, this.ctx);
@@ -457,7 +457,7 @@
           message = err;
         }
 
-        this.$notify.error({title: "Error occured while running flow", message});
+        this.$notify.error({...DEFAULT_NOTIFY_OPTIONS, title: "Error occured while running flow", message});
       });
       this.activePropEditor = "results";
     }
@@ -465,18 +465,18 @@
     public testWSConnectUrl() {
       const url = (this.nodeSettings as FlowNodeWSConnectSettings).wsconnectUrl;
       if(url === undefined || !isURL(url, {protocols: ["ws", "wss"], require_tld: false})) {
-        this.$notify.error({title: "Invalid URL", message: ""});
+        this.$notify.error({...DEFAULT_NOTIFY_OPTIONS, title: "Invalid URL"});
         return;
       }
       // let connectSuccess = false;
       const ws = new WebSocket(url);
       ws.onopen = () => {
         ws.close();
-        this.$notify({title: "Web Socket Connection Success", message: "", type: 'success'});
+        this.$notify.success({...DEFAULT_NOTIFY_OPTIONS, title: "Web Socket Connection Success"});
       };
 
       ws.onerror = () => {
-        this.$notify.error({title: "Web Socket Connection Failure", message: ""});
+        this.$notify.error({...DEFAULT_NOTIFY_OPTIONS, title: "Web Socket Connection Failure"});
       };
     }
   }

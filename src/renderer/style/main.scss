@@ -3,6 +3,7 @@
 @import url('https://fonts.googleapis.com/css?family=Source+Code+Pro');
 @import "./element-ui/index.scss";
 @import "./tooltip.scss";
+@import "./mixins.scss";
 
 * {
     box-sizing: border-box;
@@ -78,8 +79,7 @@ body {
 }
 
 .elevated {
-    box-shadow: inset #00000021 0px 1px 20px 5px, 0px 0px 10px 0px #000;
-    border-radius: 5px;
+    @include elevated;
 }
 
 // Pulse animation

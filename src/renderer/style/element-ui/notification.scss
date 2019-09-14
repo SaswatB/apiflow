@@ -1,0 +1,10 @@
+$--notification-title-color: $--text-font-color;
+$--notification-background-color: #000a12cc;
+@import "element-ui/packages/theme-chalk/src/notification.scss";
+@import "@/style/mixins.scss";
+
+@include b(notification) {
+    @include elevated;
+    background-color: $--notification-background-color;
+    border: unset;
+}

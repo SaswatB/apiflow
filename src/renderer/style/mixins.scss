@@ -6,3 +6,8 @@
 @keyframes blur-animation {
     100%  { backdrop-filter: blur(10px) saturate(150%); }
 }
+
+@mixin elevated {
+    box-shadow: inset #00000021 0px 1px 20px 5px, 0px 0px 10px 0px #000;
+    border-radius: 5px;
+}

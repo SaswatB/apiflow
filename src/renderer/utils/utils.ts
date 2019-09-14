@@ -136,3 +136,6 @@ export function pulse(element: HTMLElement) {
 export function parseString<T>(enumType: T, value: string): T[keyof T] | undefined {
   return Object.values(enumType).find((e) => e === value);
 }
+
+// default options for $notify (element-ui's notification lib)
+export const DEFAULT_NOTIFY_OPTIONS = { message: "", offset: 25 };

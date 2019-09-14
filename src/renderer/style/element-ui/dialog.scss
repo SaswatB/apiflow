@@ -1,11 +1,9 @@
-$--dialog-background-color: #000a1277;
-// $--input-font-color: $--text-font-color;
 @import "element-ui/packages/theme-chalk/src/dialog.scss";
+@import "@/style/mixins.scss";
 
 @include b(dialog) {
-    backdrop-filter: blur(8px);
-    box-shadow: white 0px 0px 15px;
-    border-radius: 25px;
+    @include dark-container;
+    @include elevated;
 }
 
 .dialog-fade-enter-active {

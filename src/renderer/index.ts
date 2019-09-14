@@ -6,6 +6,7 @@ import vuescroll from "vuescroll"
 import VueSplit from "vue-split-panel"
 import VTooltip from "v-tooltip"
 import vuemoment from "vue-moment"
+import PortalVue from 'portal-vue'
 
 import App from "@/App.vue"
 import router from "@/router"
@@ -17,6 +18,7 @@ import "@/style/main.scss"
 
 Vue.config.productionTip = false
 
+Vue.use(PortalVue)
 Vue.use(Element, {locale: require("element-ui/lib/locale/lang/en")})
 Vue.use(Overdrive)
 Vue.use(VueContext)

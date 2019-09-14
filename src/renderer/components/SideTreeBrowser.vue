@@ -43,16 +43,17 @@
         </BlurredPopover>
       </div>
     </el-tree>
-    <!-- TODO: fix style -->
-    <el-dialog :title="'Rename ' + itemName" :visible.sync="renameDialogVisible">
-      <form @submit.prevent="renameItemFromDialogInput">
-        <el-input ref="renameDialogInput" v-model="renameDialogNewName" placeholder="Name" required/>
-      </form>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="renameDialogVisible = false">Cancel</el-button>
-        <el-button type="primary" @click="renameItemFromDialogInput">Confirm</el-button>
-      </span>
-    </el-dialog>
+    <portal to="dialog">
+      <el-dialog :title="'Rename ' + itemName" :visible.sync="renameDialogVisible">
+        <form @submit.prevent="renameItemFromDialogInput">
+          <el-input ref="renameDialogInput" v-model="renameDialogNewName" placeholder="Name" required/>
+        </form>
+        <span slot="footer" class="dialog-footer">
+          <el-button @click="renameDialogVisible = false">Cancel</el-button>
+          <el-button type="primary" @click="renameItemFromDialogInput">Confirm</el-button>
+        </span>
+      </el-dialog>
+    </portal>
   </el-collapse-item>
 </template>
 

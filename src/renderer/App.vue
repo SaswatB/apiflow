@@ -2,6 +2,7 @@
   <div id="app">
     <TitleBar title="ApiFlow"/>
     <router-view/>
+    <portal-target name="dialog"/>
   </div>
 </template>
 

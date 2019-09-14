@@ -1,6 +1,6 @@
 @mixin dark-container {
     background-color: rgba(0,0,0,.6);
-    animation: blur-animation 250ms ease-in 300ms forwards;
+    animation: blur-animation 250ms ease-out 300ms forwards;
 }
 
 @keyframes blur-animation {

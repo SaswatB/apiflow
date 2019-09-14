@@ -35,6 +35,8 @@
 </script>
 
 <style lang="scss">
+  @import "@/style/mixins.scss";
+  
   .blurred-popover {
     background-color: unset !important;
     border: unset !important;
@@ -65,16 +67,16 @@
     // }
 
     .popover-body {
+      @include dark-container;
+      @include elevated;
+
       position: absolute;
       top: 0;
       bottom: 0;
       left: 0;
       right: 0;
       padding: 15px;
-      backdrop-filter: blur(3px);
-      background-color: #000a1277;
       color: white;
-      box-shadow: white 0 0 5px;
       border-radius: 5px;
     }
   }

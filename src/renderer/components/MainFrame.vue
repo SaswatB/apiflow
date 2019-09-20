@@ -64,7 +64,7 @@
 
   import SideTreeBrowser from "@/components/SideTreeBrowser.vue"
   import RequestEditor from "@/components/editors/RequestEditor.vue"
-  import FlowEditor from "@/components/editors/FlowEditor.vue"
+  import FlowEditor from "@/components/editors/FlowEditor/index.vue"
 
   @Component({ components: { SideTreeBrowser, RequestEditor, FlowEditor } })
   export default class MainFrame extends Vue {

@@ -53,7 +53,11 @@ export function sendCurl(request: SendCurlRequest) {
       curl.setOpt(Curl.option.POST, true);
       // add a body for post requests, if one is given
       if(request.body !== undefined) {
-        curl.setOpt(Curl.option.POSTFIELDS, request.body);
+        if (typeof request.body === "string") {
+          curl.setOpt(Curl.option.POSTFIELDS, request.body);
+        } else {
+          curl.setOpt(Curl.option.POSTFIELDS, JSON.stringify(request.body));
+        }
         curl.setOpt(Curl.option.POSTFIELDSIZE, -1);
       } else {
         // set an empty body

@@ -1,5 +1,6 @@
 import { cloneDeep } from "lodash";
 import { Procedure, newLinkedValueId, ProcedureMap } from "./Procedure"
+import { SendCurlResult } from "@/sendCurl";
 
 export enum RequestMethod {
   Get = "GET",
@@ -42,7 +43,7 @@ export class Request implements Procedure {
   //payload
   bodyType = RequestBodyType.None
   body = "" //ace editor doesn't like undefined
-  response = {}
+  response: SendCurlResult | {} = {}
 
   private constructor(id:string, name: string, authSimpleUsername: string, authSimplePassword: string, authToken: string) {
     this.id = id
@@ -64,7 +65,7 @@ export class Request implements Procedure {
     return Request.migrate(cloneDeep(requestMap[id]));
   }
 
-  static migrate(obj: any) {
+  static migrate(obj: RequestData) {
     const req = Request.placeholder();
     Object.assign(req, obj);
     return req;

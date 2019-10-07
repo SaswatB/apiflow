@@ -4,7 +4,7 @@
       <!-- TODO: limit and persist split -->
       <!-- Sidebar -->
       <SplitArea :size="25" :min-size="200">
-        <vue-scroll class="sidebar">
+        <div class="sidebar scroll">
           <div class="sidebar-content">
             <el-select v-model="currentProject" placeholder="Project">
               <el-option v-for="item in projects" :key="item.value" :label="item.label" :value="item.value"/>
@@ -28,7 +28,7 @@
                 @item-selected="requestSelected"/>
             </el-collapse>
           </div>
-        </vue-scroll>
+        </div>
       </SplitArea>
       <!-- Editor -->
       <SplitArea :size="75">

@@ -1,4 +1,6 @@
 import { Curl, CurlInfoDebug, HeaderInfo } from "node-libcurl";
+import { merge } from "lodash";
+import { isJsonContentType, getHeader } from "@/../renderer/utils/utils";
 
 export interface SendCurlRequest {
   method: 'GET' | 'POST';
@@ -7,7 +9,7 @@ export interface SendCurlRequest {
   body?: string;
 }
 
-interface DebugLog {
+export interface DebugLog {
   timestamp: number;
   message: string;
 }
@@ -22,7 +24,7 @@ interface TimingData {
 export interface SendCurlResult {
   statusCode: number;
   data: string | Buffer;
-  headers: HeaderInfo[] | Buffer;
+  headers: HeaderInfo;
   timingData: TimingData;
   debugLog: DebugLog[];
 }
@@ -115,10 +117,20 @@ export function sendCurl(request: SendCurlRequest) {
           total: curl.getInfo(Curl.info.TOTAL_TIME_T) as number
         }
 
+        // flatten header groups
+        const mergedHeaders = merge({}, ...headers);
+
+        // parse the returned data if it's a json
+        let parsedData = data;
+        const contentType = getHeader(mergedHeaders, 'content-type');
+        if (contentType && isJsonContentType(contentType)) {
+          parsedData = JSON.parse(parsedData.toString());
+        }
+
         // return curl's result
-        resolve({ statusCode, data, headers, timingData, debugLog });
+        resolve({ statusCode, data: parsedData, headers: mergedHeaders, timingData, debugLog });
       } catch(err) {
-        console.log("Error processing curl end", err)
+        reject(err);
       }
       curl.close();
     });

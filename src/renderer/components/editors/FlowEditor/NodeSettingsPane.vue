@@ -66,44 +66,47 @@
         </el-form-item>
       </el-form>
     </el-col>
-    <el-dialog
-      :visible.sync="linkedValueEditorVisible"
-      title="Linked Value Editor">
-      <el-form label-width="120px" @submit.native.prevent="">
-        <div v-for="link in nodeSettingsLinkedValues" :key="node.id + '_' + link.id" class="code-field">
-          <span class="code-title">{{ link.name }}</span>
-          <div class="code-editor-wrapper">
-            <AceEditor
-              v-model="value.linkedValueData[link.id]"
-              class="code-editor"
-              lang="javascript"
-              theme="merbivore_soft"
-              @init="linkedValueEditorInit"/>
-            <div v-if="!value.linkedValueData[link.id]" class="code-editor-empty">
-              <span>Enter a Javascript expression...</span>
+    <portal to="dialog">
+      <el-dialog
+        :visible.sync="linkedValueEditorVisible"
+        title="Linked Value Editor">
+        <el-form label-width="120px" @submit.native.prevent="">
+          <div v-for="link in nodeSettingsLinkedValues" :key="node.id + '_' + link.id" class="code-field">
+            <span class="code-title">{{ link.name }}</span>
+            <div class="code-editor-wrapper">
+              <AceEditor
+                v-model="value.linkedValueData[link.id]"
+                class="code-editor"
+                lang="javascript"
+                theme="merbivore_soft"
+                @init="linkedValueEditorInit"/>
+              <div v-if="!value.linkedValueData[link.id]" class="code-editor-empty">
+                <span>Enter a Javascript expression...</span>
+              </div>
             </div>
           </div>
-        </div>
-      </el-form>
-      <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="linkedValueEditorVisible = false">Close</el-button>
-      </span>
-    </el-dialog>
+        </el-form>
+        <span slot="footer" class="dialog-footer">
+          <el-button type="primary" @click="linkedValueEditorVisible = false">Close</el-button>
+        </span>
+      </el-dialog>
+    </portal>
   </el-row>
 </template>
 
 <script lang="ts">
   import { Vue, Component, Prop } from "vue-property-decorator"
   import isURL from "validator/lib/isURL";
+  import AceEditor from "vue2-ace-editor"
 
-  import { FlowContext, FlowNodeSettings, FlowNodeSleepSettings, FlowNodeRequestSettings, FlowNodeWSConnectSettings, Flow, FlowNodeType } from "@/model/Flow";
+  import { FlowContext, FlowNodeSettings, FlowNodeSleepSettings, FlowNodeRequestSettings, FlowNodeWSConnectSettings, Flow, FlowNodeType, FlowDagNode } from "@/model/Flow";
   import { dumpObjectStrings, DEFAULT_NOTIFY_OPTIONS } from "@/utils/utils";
 
-  @Component({})
+  @Component({ components: { AceEditor }})
   export default class NodeSettingsPane extends Vue {
     @Prop(Object) value!: FlowNodeSettings
     @Prop(Object) flow!: Flow
-    @Prop(Object) node!: any
+    @Prop(Object) node!: FlowDagNode
     @Prop(Object) ctx!: FlowContext
 
     public linkedValueEditorVisible = false
@@ -235,6 +238,8 @@
 
     .code-title {
       padding: 10px;
+      width: 120px;
+      text-align: right;
     }
     .code-editor-wrapper {
       position: relative;

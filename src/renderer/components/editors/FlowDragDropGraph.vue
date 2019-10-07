@@ -1,14 +1,9 @@
 <template>
-  <div class="graph-scroll-container">
-    <vue-scroll ref="graphScroll">
-      <div ref="graphContainer"/>
-    </vue-scroll>
-  </div>
+  <div ref="graphContainer" class="graph-container scroll"/>
 </template>
 
 <script lang="ts">
   import { Vue, Component, Prop, Watch } from "vue-property-decorator"
-  import vuescroll from "vuescroll";
   import { v4 as uuidv4 } from "uuid"
   import * as d3 from "d3"
   import * as d3dag from "d3-dag"
@@ -42,7 +37,6 @@
     @Prop(Array) value!: Array<FlowNode>
 
     public $refs!: Vue['$refs'] & {
-      graphScroll: vuescroll,
       graphContainer: HTMLElement
     };
 
@@ -163,11 +157,11 @@
 
     // updates the graph with changes from value
     refreshNodes() {
-      // convert out data to the dag format and generate a layout
+      // convert the data into a dag and generate a layout
       let dag = d3dag.dratify()(this.value);
       d3dag.sugiyama().layering(d3dag.layeringSimplex()).decross(d3dag.decrossOpt()).coord(d3dag.coordGreedy())(dag);
 
-      // calculate an acceptable size for the dag, this isn"t perfect due to the strange ways the dag can get laid out
+      // calculate an acceptable size for the dag, this isn't perfect due to the strange ways the dag can get laid out
       let dagWidth = 500, dagHeight = 300;
       let maxLayer = 1;
       let layerCount: Array<number> = []
@@ -401,7 +395,7 @@
 
       if((this.scrollDx != 0 || this.scrollDy != 0) && this.scrollTimer == undefined) {
         this.scrollTimer = setInterval(
-          () => {this.$refs.graphScroll.scrollBy({x: this.scrollDx, y: this.scrollDy})},
+          () => {this.$refs.graphContainer.scrollBy(this.scrollDx/5, this.scrollDy/5)},
           50) as unknown as number;
       }
     }
@@ -623,7 +617,7 @@
 </script>
 
 <style lang="scss">
-.graph-scroll-container {
+.graph-container {
   height: 100%;
   width: 100%;
 
@@ -675,10 +669,6 @@
     stroke: transparent;
     fill: none;
     cursor: pointer;
-  }
-
-  .__vuescroll .__panel.__native {
-    overflow: hidden;
   }
 }
 </style>

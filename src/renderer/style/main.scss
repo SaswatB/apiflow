@@ -4,6 +4,7 @@
 @import "./element-ui/index.scss";
 @import "./tooltip.scss";
 @import "./mixins.scss";
+@import "./json-viewer.scss";
 
 * {
     box-sizing: border-box;
@@ -93,4 +94,29 @@ $--pulse-res: 3;
     @keyframes pulse-animation-#{$i} {
         20%  { background-color: $--pulse-color; }
     }
+}
+
+.ace_hidden-cursors {
+    opacity:0;
+}
+
+// TODO: scroll shadow
+.scroll {
+    overflow: auto;
+    height: 100%;
+    width: 100%;
+}
+
+::-webkit-scrollbar {     
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-thumb:window-inactive,
+::-webkit-scrollbar-thumb {
+    background-color:  rgba(255,255,255,0.4);
+}
+
+::-webkit-scrollbar-track, ::-webkit-scrollbar-corner  {
+    background-color:  rgba(255,255,255,0.2);
 }

@@ -16,7 +16,7 @@ app.on("ready", () => {
   let installExtension = require("electron-devtools-installer")
   installExtension.default(installExtension.VUEJS_DEVTOOLS)
     .then(() => {})
-    .catch((err:any) => {
+    .catch((err: unknown) => {
       console.warn("Unable to install `vue-devtools`: \n", err)
     })
 })

@@ -97,7 +97,7 @@ export class Flow implements FlowData {
     return Flow.migrate(cloneDeep(flowMap[id]));
   }
 
-  static migrate(obj: any) {
+  static migrate(obj: FlowData) {
     const flow = Flow.placeholder();
     Object.assign(flow, obj);
     return flow;

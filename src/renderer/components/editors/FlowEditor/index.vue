@@ -6,7 +6,7 @@
       </SplitArea>
       <SplitArea :size="47">
         <div class="prop-editor elevated">
-          <el-tabs v-model="activePropEditor" :tab-position="'left'">
+          <el-tabs v-model="activeEditorTab" :tab-position="'left'">
             <!-- Flow Settings -->
             <el-tab-pane label="Flow Editor" name="flow-editor">
               <FlowSettingsPane @run-flow="runFlow" />
@@ -15,9 +15,13 @@
             <el-tab-pane label="Flow Log" name="results">
               <LogPane :log="flowRunner.log" @log-click="onLogClick" />
             </el-tab-pane>
-            <!-- Node Editor -->
+            <!-- Node Settings -->
             <el-tab-pane v-if="isNodeEditor" label="Node Editor" name="node-editor" class="node-editor">
-              <NodeSettingsPane v-model="nodeSettings" :flow="value" :node="selectedNode" :ctx="ctx" @delete-node="deleteSelection" />
+              <NodeSettingsPane v-model="nodeSettings" 
+                                :flow="value" 
+                                :node="selectedNode" 
+                                :ctx="ctx" 
+                                @delete-node="deleteSelection" />
             </el-tab-pane>
             <!-- Node Results -->
             <el-tab-pane v-if="isNodeEditor" label="Node Results" name="node-results">
@@ -34,7 +38,7 @@
             <el-tab-pane v-if="isNodeEditor" label="Node Log" name="node-log">
               <LogPane :log="flowRunner.log" :node-id="selectedNode.id" />
             </el-tab-pane>
-            <!-- Edge Editor -->
+            <!-- Edge Settings -->
             <el-tab-pane v-if="isEdgeEditor" label="Edge Editor" name="edge-editor" class="edge-editor">
               <el-row>
                 <el-col :span="12">
@@ -61,14 +65,14 @@
   import AceEditor from "vue2-ace-editor"
   import { js as beautify } from "js-beautify"
 
-  import { FlowPlayNodeId, FlowContext, Flow } from "@/model/Flow"
+  import { FlowPlayNodeId, FlowContext, Flow, FlowDagNode } from "@/model/Flow"
   import { FlowRunnerLogEntryTargetPane, FlowRunnerLogEntry, FlowRunner } from "@/utils/FlowRunner"
   import { DEFAULT_NOTIFY_OPTIONS } from "@/utils/utils"
 
   import BlurredPopover from "@/components/standalone/BlurredPopover.vue"
   import FlowDragDropGraph from "@/components/editors/FlowDragDropGraph.vue"
   import FlowSettingsPane from "@/components/editors/FlowEditor/FlowSettingsPane.vue"
-  import LogPane from "@/components/editors/FlowEditor/LogPane.vue"
+  import LogPane from "@/components/standalone/LogPane.vue"
   import NodeSettingsPane from "@/components/editors/FlowEditor/NodeSettingsPane.vue"
 
   @Component({ components: { AceEditor, BlurredPopover, FlowDragDropGraph, FlowSettingsPane, LogPane, NodeSettingsPane } })
@@ -82,8 +86,8 @@
     };
 
     public propEditor = "none"
-    public activePropEditor = "flow-editor"
-    public selectedNode: any = {}
+    public activeEditorTab = "flow-editor"
+    public selectedNode: Partial<FlowDagNode> = {}
     public selectedEdge: any = {}
     public flowRunner = FlowRunner.placeholder()
 
@@ -92,11 +96,11 @@
     get isNodeEditor() { return this.propEditor == "node"; }
     get isEdgeEditor() { return this.propEditor == "edge"; }
 
-    get isNodeActiveEditor() { return this.activePropEditor.startsWith("node-"); }
-    get isEdgeActiveEditor() { return this.activePropEditor.startsWith("edge-"); }
+    get isNodeActiveEditor() { return this.activeEditorTab.startsWith("node-"); }
+    get isEdgeActiveEditor() { return this.activeEditorTab.startsWith("edge-"); }
 
     get nodeSettings() { 
-      let s = this.value.nodeSettingsMap[this.selectedNode.id]; // TODO: look into doing migrations here if necessary
+      let s = this.value.nodeSettingsMap[this.selectedNode.id!]; // TODO: look into doing migrations here if necessary
       if(s == undefined) {
         this.nodeSettings = { linkedValueData: {} };
         s = this.nodeSettings;
@@ -106,18 +110,18 @@
       }));
       return s;
     }
-    set nodeSettings(settings) { Vue.set(this.value.nodeSettingsMap, this.selectedNode.id, settings) }
+    set nodeSettings(settings) { Vue.set(this.value.nodeSettingsMap, this.selectedNode.id!, settings) }
 
 
     get nodePrettyResult() {
-      if(this.flowRunner.results[this.selectedNode.id] != undefined)
-        return beautify(JSON.stringify(this.flowRunner.results[this.selectedNode.id][0])); // TODO: support multiple results
+      if(this.flowRunner.results[this.selectedNode.id!] != undefined)
+        return beautify(JSON.stringify(this.flowRunner.results[this.selectedNode.id!][0])); // TODO: support multiple results
       return "// No Data"
     }
     set nodePrettyResult(ignored) {}
 
-    @Watch("activePropEditor")
-    handleActivePropEditorChanged(val: string) {
+    @Watch("activeEditorTab")
+    handleactiveEditorTabChanged(val: string) {
       if(val === "node-results") {
         const ace = this.$refs.nodeResultViewer;
         if(ace) {
@@ -128,14 +132,14 @@
 
     public nodeSelected(node: any) {
       this.propEditor = "node";
-      if(!this.isNodeActiveEditor) this.activePropEditor = "node-editor"
+      if(!this.isNodeActiveEditor) this.activeEditorTab = "node-editor"
       this.selectedNode = node;
       this.selectedEdge = {};
     }
 
     public edgeSelected(edge: any) {
       this.propEditor = "edge";
-      if(!this.isEdgeActiveEditor) this.activePropEditor = "edge-editor"
+      if(!this.isEdgeActiveEditor) this.activeEditorTab = "edge-editor"
       this.selectedNode = {};
       this.selectedEdge = edge;
     }
@@ -143,7 +147,7 @@
     public clearSelection() {
       this.propEditor = "none";
       if(this.isNodeActiveEditor || this.isEdgeActiveEditor) 
-        this.activePropEditor = "flow-editor";
+        this.activeEditorTab = "flow-editor";
       this.selectedNode = {};
       this.selectedEdge = {};
       this.graph.clearSelection(true);
@@ -160,13 +164,13 @@
       this.graph.selectNodeById(logEntry.nodeId);
       switch(logEntry.targetPane){
         case FlowRunnerLogEntryTargetPane.PropertyEditor:
-          this.activePropEditor = "node-editor";
+          this.activeEditorTab = "node-editor";
           break;
         case FlowRunnerLogEntryTargetPane.ResultViewer:
-          this.activePropEditor = "node-results";
+          this.activeEditorTab = "node-results";
           break;
         case FlowRunnerLogEntryTargetPane.LogViewer:
-          this.activePropEditor = "node-log"
+          this.activeEditorTab = "node-log"
           break;
       }
     }
@@ -192,7 +196,7 @@
 
         this.$notify.error({...DEFAULT_NOTIFY_OPTIONS, title: "Error occured while running flow", message});
       });
-      this.activePropEditor = "results";
+      this.activeEditorTab = "results";
     }
 
   }

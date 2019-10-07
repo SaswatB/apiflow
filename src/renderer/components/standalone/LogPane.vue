@@ -7,25 +7,27 @@
       placement="top"
       popover-body-class="filter-popover">
       <el-select v-model="logLevelFilter">
-        <el-option label="Verbose" :value="levels.VERBOSE"/>
-        <el-option label="Information" :value="levels.INFORMATION"/>
-        <el-option label="Warning" :value="levels.WARNING"/>
-        <el-option label="Error" :value="levels.ERROR"/>
+        <el-option :value="levels.VERBOSE" label="Verbose"/>
+        <el-option :value="levels.INFORMATION" label="Information"/>
+        <el-option :value="levels.WARNING" label="Warning"/>
+        <el-option :value="levels.ERROR" label="Error"/>
       </el-select>
-      <el-button v-tooltip="'Filter Log'" slot="reference" class="filter-btn"><i class="mdi mdi-filter"/></el-button>
+      <el-button v-tooltip="'Filter Log'" v-if="!isDebugLog" slot="reference" class="filter-btn"><i class="mdi mdi-filter"/></el-button>
     </BlurredPopover>
     <el-button v-tooltip="'Copy Log'" class="copy-btn" @click="onCopyLog"><i class="mdi mdi-content-copy"/></el-button>
-    <span
-      v-for="(entry, index) in filteredLogs"
-      :key="index"
-      :class="getClassFromLogLevel(entry.level) + (!isNodeLog && entry.nodeId !== undefined ? ' clickable' : '')"
-      class="entry"
-      @click="!isNodeLog && onLogClick(entry)">
-      {{ entry.time | moment(logTimeFormat) }}
-      <span class="entry-level">{{ getFormattedTagFromLogLevel(entry.level) }}</span>
-      {{ entry.entry }}
-    </span>
-    <span v-if="filteredLogs.length === 0" class="muted">No Logs</span>
+    <div class="scroll">
+      <span
+        v-for="(entry, index) in filteredLogs"
+        :key="index"
+        :class="getClassFromLog(entry) + (!isDebugLog && !isNodeLog && entry.nodeId !== undefined ? ' clickable' : '')"
+        class="entry"
+        @click="!isDebugLog && !isNodeLog && onLogClick(entry)">
+        <span class="timestamp">{{ (entry.time || entry.timestamp) | moment(logTimeFormat) }}</span>
+        <span v-if="!isDebugLog" class="entry-level">{{ getFormattedTagFromLogLevel(entry.level) }}</span>
+        <span class="message">{{ entry.entry || entry.message }}</span>
+      </span>
+      <span v-if="filteredLogs.length === 0" class="muted">No Logs</span>
+    </div>
   </div>
 </template>
 
@@ -35,11 +37,13 @@
   import BlurredPopover from "@/components/standalone/BlurredPopover.vue"
   import { FlowRunnerLogLevel, FlowRunnerLogEntry } from "@/utils/FlowRunner";
   import { DEFAULT_NOTIFY_OPTIONS } from "@/utils/utils";
+  import { DebugLog } from "@/sendCurl";
 
   @Component({ components: { BlurredPopover }})
-  export default class LogPane extends Vue {
-    @Prop(Array) log!: Array<FlowRunnerLogEntry>
+  export default class LogPane<T> extends Vue {
+    @Prop(Array) log!: (FlowRunnerLogEntry | DebugLog)[]
     @Prop(String) nodeId?: string
+    @Prop(Boolean) isDebugLog?: boolean
 
     protected levels = FlowRunnerLogLevel; // expose the constant to the template
     protected logLevelFilter = FlowRunnerLogLevel.VERBOSE // TODO: persist
@@ -60,7 +64,7 @@
         if (this.isNodeLog && entry.nodeId !== this.nodeId) return false;
 
         // filter by level
-        switch (entry.level) {
+        switch((entry as FlowRunnerLogEntry).level) {
           case FlowRunnerLogLevel.VERBOSE:
             if (this.logLevelFilter == FlowRunnerLogLevel.INFORMATION) return false;
             // falls through
@@ -96,8 +100,8 @@
       this.$notify.success({...DEFAULT_NOTIFY_OPTIONS, title: "Log Copied"});
     }
 
-    protected getFormattedTagFromLogLevel(level: FlowRunnerLogLevel) {
-      switch(level) {
+    protected getFormattedTagFromLogLevel(log: FlowRunnerLogEntry | DebugLog) {
+      switch((log as FlowRunnerLogEntry).level) {
         case FlowRunnerLogLevel.ERROR:
           return "ERR ";
         case FlowRunnerLogLevel.WARNING:
@@ -106,11 +110,13 @@
           return "INFO";
         case FlowRunnerLogLevel.VERBOSE:
           return "VRBS";
+        default:
+          return "";
       }
     }
 
-    protected getClassFromLogLevel(level: FlowRunnerLogLevel) {
-      switch(level) {
+    protected getClassFromLog(log: FlowRunnerLogEntry | DebugLog) {
+      switch((log as FlowRunnerLogEntry).level) {
         case FlowRunnerLogLevel.ERROR:
           return "error-entry";
         case FlowRunnerLogLevel.WARNING:
@@ -119,6 +125,8 @@
           return "information-entry";
         case FlowRunnerLogLevel.VERBOSE:
           return "verbose-entry";
+        default:
+          return "misc-entry";
       }
     }
   }
@@ -130,7 +138,6 @@
     padding: 15px 30px;
     height: 100%;
     font-size: 14px;
-    overflow-y: auto; // TODO: replace with vuescroll
     position: relative;
 
     .filter-btn, .copy-btn {
@@ -163,11 +170,20 @@
         }
       }
 
+      .timestamp {
+        color: #a0a0a0;
+        padding-right: 10px;
+      }
+
       .entry-level {
         font-weight: 800;
         min-width: 40px;
         margin-left: 10px;
         display: inline-block;
+      }
+
+      .message {
+        word-break: break-word;
       }
 
       &.error-entry {

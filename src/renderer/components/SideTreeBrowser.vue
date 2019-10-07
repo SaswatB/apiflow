@@ -18,7 +18,6 @@
         </div>
       </div>
     </template>
-    <!-- TODO: scroll shadow https://vuescrolljs.yvescoding.org/guide/event.html#handle-resize -->
     <el-tree
       ref="tree"
       :allow-drop="allowDrop"

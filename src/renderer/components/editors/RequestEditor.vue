@@ -3,7 +3,7 @@
     <Split :gutter-size="12">
       <!-- TODO: limit and persist split -->
       <SplitArea :size="50" :min-size="356">
-        <vue-scroll class="request-editor-scroll elevated">
+        <div class="request-editor-container scroll elevated">
           <div class="request-editor">
             <div ref="requestBar" class="request-bar">
               <el-input v-model="value.url" placeholder="URL" required>
@@ -89,18 +89,30 @@
               </MorphingCollapse>
             </el-collapse>
           </div>
-        </vue-scroll>
+        </div>
       </SplitArea>
       <SplitArea :size="50">
-        <AceEditor
-          ref="responseViewer"
-          v-model="prettyResponse"
-          disabled
-          class="elevated"
-          lang="javascript"
-          theme="merbivore_soft"
-          width="100%"
-          height="100%"/>
+        <div class="request-result elevated">
+          <el-tabs v-model="activeResultTab">
+            <el-tab-pane label="Results" name="default-results">
+              <json-viewer
+                :value="value.response.data"
+                theme="dark-json-viewer-theme"
+                copyable
+                sort/>
+            </el-tab-pane>
+            <el-tab-pane label="Log" name="log-results">
+              <LogPane :log="value.response.debugLog" is-debug-log />
+            </el-tab-pane>
+            <el-tab-pane label="Raw" name="raw-results">
+              <json-viewer
+                :value="rawResponse"
+                theme="dark-json-viewer-theme"
+                copyable
+                sort/>
+            </el-tab-pane>
+          </el-tabs>
+        </div>
       </SplitArea>
     </Split>
   </div>
@@ -112,10 +124,11 @@
   import AceEditor from "vue2-ace-editor"
   import isURL from "validator/lib/isURL"
   import isJSON from "validator/lib/isJSON"
-  import difference from "lodash/difference"
-  import { js as beautify } from "js-beautify"
+  import { omit, difference } from "lodash"
   import parseCurl from "parse-curl"
   import { ElCollapseItem } from "element-ui/types/collapse-item";
+  // @ts-ignore TODO add types
+  import JsonViewer from 'vue-json-viewer';
 
   import "brace"
   import "brace/ext/language_tools"
@@ -129,11 +142,12 @@
 
   import StoredLinkedInput from "@/components/StoredLinkedInput.vue"
   import MorphingCollapse from "@/components/standalone/MorphingCollapse.tsx"
+  import LogPane from "@/components/standalone/LogPane.vue"
 
   import { sendRequest } from "@/utils/requestUtils"
   import { pulse, parseString, DEFAULT_NOTIFY_OPTIONS } from "@/utils/utils";
 
-  @Component({ components: { AceEditor, StoredLinkedInput, MorphingCollapse } })
+  @Component({ components: { AceEditor, StoredLinkedInput, MorphingCollapse, LogPane, JsonViewer } })
   export default class RequestEditor extends Vue {
     @Prop(Object) value!: Request
 
@@ -143,15 +157,14 @@
       headerForm: ElCollapseItem,
       payloadForm: MorphingCollapse,
       jsonPayloadEditor: any,
-      responseViewer: any,
     };
     
-    ProceduresStore = getModule(Procedures, this.$store)
-    activeForms:Array<string> = []
-    authFormName = "Authentication"
-    headersFormName = "Headers"
-    payloadFormName = "Payload"
-    jsonPayloadEditorOptions = {
+    protected ProceduresStore = getModule(Procedures, this.$store)
+    protected activeForms:Array<string> = []
+    protected authFormName = "Authentication"
+    protected headersFormName = "Headers"
+    protected payloadFormName = "Payload"
+    protected jsonPayloadEditorOptions = {
       tabSize: 4,
       mode: "text/javascript",
       theme: "base16-dark",
@@ -159,16 +172,17 @@
       line: true,
       placeholder: "JSON Body"
     }
-    transitionClone?: Node
-    zIndex = 10000
+    protected transitionClone?: Node
+    protected zIndex = 10000
+    protected activeResultTab = 'default-results'
     
     get method() { return this.value.method }
-    get methodOptions() { return Object.keys(RequestMethod).map(k => RequestMethod[k as any]); }
+    get methodOptions() { return Object.keys(RequestMethod).map(k => RequestMethod[k as keyof typeof RequestMethod]); }
 
     get authenticationTypeIsNone() { return this.value.authType === RequestAuthenticationType.None }
     get authenticationTypeIsSimple() { return this.value.authType === RequestAuthenticationType.Basic }
     get authenticationTypeIsToken() { return this.value.authType === RequestAuthenticationType.Bearer }
-    get authenticationOptions() { return Object.keys(RequestAuthenticationType).map(k => RequestAuthenticationType[k as any]); }
+    get authenticationOptions() { return Object.keys(RequestAuthenticationType).map(k => RequestAuthenticationType[k as keyof typeof RequestAuthenticationType]); }
 
     get bodyTypeIsNone() { return this.value.bodyType === RequestBodyType.None }
     get bodyTypeIsRaw() { return this.value.bodyType === RequestBodyType.Raw }
@@ -176,14 +190,7 @@
     get bodyTypeIsJSON() { return this.value.bodyType === RequestBodyType.JSON }
     get payloadOptions() { return this.method != undefined ? getBodyTypes(this.method) : [RequestBodyType.None]; }
 
-    get prettyResponse() { return beautify(JSON.stringify(this.value.response)) }
-    set prettyResponse(ignored) {}
-
-
-    mounted() {
-      this.$refs.responseViewer.editor.setReadOnly(true);
-    }
-
+    get rawResponse() { return omit(this.value.response, ["timingData", "debugLog"]) }
 
     @Watch("method")
     handleMethodChanged() { 
@@ -218,7 +225,7 @@
     // }
 
     @Watch("value", { deep: true })
-    handleValuePropChanged() {
+    handleValuePropChanged(newValue: Request, oldValue: Request) {
       // if a curl command was pasted in the url box, process it and replace the current request
       if (this.value.url && this.value.url.trim().toLowerCase().startsWith('curl ')) {
         const cmd = parseCurl(this.value.url);
@@ -237,6 +244,10 @@
         }
         this.value.body = cmd.body || '';
         this.pulseForm();
+      }
+      // default to raw results if default results is null
+      if (newValue !== oldValue && !newValue.response.data && this.activeResultTab === 'default-results') {
+        this.activeResultTab = "raw-results";
       }
     }
 
@@ -302,9 +313,13 @@
       // send the request, with the resolved linked values
       sendRequest(this.value, this.constructLinkedValuesMap(linkedValueIds))
         .then((response) => {
-          this.value.response = response
+          this.value.response = response;
+          if(!response.data && this.activeResultTab === 'default-results') {
+            this.activeResultTab = "raw-results";
+          }
         }).catch((error) => {
-          this.value.response = error
+          this.value.response = error;
+          this.activeResultTab = "raw-results";
         });
     }
 
@@ -345,10 +360,30 @@
       min-height: unset !important; // TODO: look into why this is needed for scrolling
     }
 
-    .request-editor-scroll {
+    .request-editor-container, .request-result {
       @include dark-container;
-      .request-editor {
-        padding: 10px;
+    }
+    .request-editor, .request-result {
+      padding: 10px;
+    }
+
+    .request-result {
+      height: 100%;
+      width: 100%;
+
+      .el-tabs {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+
+        .el-tabs__content {
+          flex: 1;
+
+          .el-tab-pane {
+            height: 100%;
+            width: 100%;
+          }
+        }
       }
     }
 

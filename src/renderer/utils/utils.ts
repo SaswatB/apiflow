@@ -1,3 +1,4 @@
+import contentTypeParser from "content-type-parser";
 import { ProcedureMap, ProcedureFolderItemType, ProcedureRootFolderName, ProcedureFolderMap } from "@/../renderer/model/Procedure"
 import { FlowNode } from "@/../renderer/model/Flow"
 
@@ -139,3 +140,23 @@ export function parseString<T>(enumType: T, value: string): T[keyof T] | undefin
 
 // default options for $notify (element-ui's notification lib)
 export const DEFAULT_NOTIFY_OPTIONS = { message: "", offset: 25 };
+
+// based on https://mimesniff.spec.whatwg.org/#mime-type-groups
+export function isJsonContentType(contentType: string) {
+  const parsedType = contentTypeParser(contentType);
+
+  return parsedType && (
+    (
+      (parsedType.type === 'application' || parsedType.type === 'text')
+      && parsedType.subtype === 'json'
+    ) || parsedType.subtype.endsWith('+json')
+  );
+}
+
+/**
+ * Case-insensitive header get
+ */
+export function getHeader(headers: { [index: string]: string }, name: string) {
+  const key = Object.keys(headers).find(key => key.toLowerCase() === name.toLowerCase());
+  return key ? headers[key] : undefined;
+}

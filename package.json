@@ -82,7 +82,7 @@
     "vue": "^2.6.10",
     "vue-context": "^3.4.0",
     "vue-json-viewer": "^2.2.5",
-    "vue-moment": "^4.0.0",
+    "vue-moment": "^4.1.0",
     "vue-overdrive": "^0.0.12",
     "vue-router": "^3.0.1",
     "vue-split-panel": "^1.0.4",

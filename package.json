@@ -61,7 +61,7 @@
   "dependencies": {
     "@mdi/font": "^3.0.39",
     "@soleng-fuze/electron-debug": "^1.5.2",
-    "axios": "^0.18.0",
+    "axios": "^0.21.1",
     "content-type-parser": "^1.0.2",
     "d3": "^5.7.0",
     "d3-dag": "^0.1.2",

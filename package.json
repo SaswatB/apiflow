@@ -68,7 +68,7 @@
     "electron-promise-ipc": "^1.2.2",
     "element-ui": "^2.4.10",
     "js-beautify": "^1.8.8",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.21",
     "node-libcurl": "^2.0.2",
     "parse-curl": "^0.2.6",
     "portal-vue": "^2.1.6",
